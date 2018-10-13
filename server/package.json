@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.334.0",
+    "aws-xray-sdk": "^2.0.0",
+    "serverless-plugin-tracing": "^2.0.0",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

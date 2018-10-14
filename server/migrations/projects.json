@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "sort": "detail",
+    "title": "sample-project",
+    "detail": {
+      "owner": [ "user1" ]
+    }
+  },
+  {
+    "id": "1",
+    "sort": "ticket-1",
+    "title": "some bug reported!",
+    "detail": {
+      "assigned_to": "user1"
+    }
+  },
+  {
+    "id": "1",
+    "sort": "ticket-2",
+    "title": "feature request: piyo",
+    "detail": {
+      "assigned_to": "user1"
+    }
+  },
+  {
+    "id": "2",
+    "sort": "detail",
+    "title": "sample-empty-project",
+    "detail": {
+      "owner": [ "user2", "user3" ]
+    }
+  }
+]

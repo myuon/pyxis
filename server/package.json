@@ -6,6 +6,11 @@
   "dependencies": {
     "aws-sdk": "^2.334.0",
     "aws-xray-sdk": "^2.0.0",
-    "serverless-plugin-tracing": "^2.0.0"
+    "serverless-dynamodb-local": "^0.2.35",
+    "serverless-plugin-tracing": "^2.0.0",
+    "serverless-webpack": "^5.2.0"
+  },
+  "devDependencies": {
+    "serverless-offline": "^3.27.0"
   }
 }

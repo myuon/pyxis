@@ -2,7 +2,7 @@
   <div class="container">
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span># 2018</span>
+        <span># {{ $route.params.id }}</span>
         <el-button style="float: right; padding: 3px 0" type="text">Operation button</el-button>
       </div>
 
@@ -23,11 +23,16 @@
           </div>
 
           <div class="form-control">
-            <span>Assigner</span>
+            <span>Assigned to</span>
 
-            <el-select v-model="data.assigner" placeholder="Select" style="width: 100%;">
+            <el-select
+              v-model="data.assigned_to"
+              multiple
+              collapse-tags
+              placeholder="Select"
+              style="width: 100%;">
               <el-option
-                v-for="item in data.assingerOptions"
+                v-for="item in members"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value">
@@ -79,9 +84,9 @@
             <span class="collapse-title">Comments</span>
           </template>
 
-          <el-row class="comment-feed" justify="space-between">
+          <el-row class="comment-feed" justify="space-between" :key="comment.id" v-for="comment in client.comment.get(data.id).fetch(10)">
             <div class="meta">
-              <span class="timestamp">#1 [2018-10-13 18:30:00]</span>
+              <span class="timestamp">#{{ comment.id }} [{{ comment.created_at }}]</span>
             </div>
 
             <el-col :span="1" class="icon">
@@ -90,8 +95,8 @@
 
             <el-col :span="11">
               <div class="comment">
-                <span class="summary">@watashi commented:</span>
-                <vue-markdown :source="'- hoge\n- piyo\n- nyan'" />
+                <span class="summary">@{{ comment.created_by }} commented:</span>
+                <vue-markdown :source="comment.content" />
               </div>
             </el-col>
           </el-row>
@@ -103,6 +108,7 @@
 </template>
 
 <script>
+import { Client } from '@/client';
 import VueMarkdown from 'vue-markdown'
 
 export default {
@@ -119,16 +125,16 @@ export default {
     },
   },
   data () {
+    const client = Client;
+
     return {
-      data: {
-        id: 2018,
-        assigner: 'me',
-        assingerOptions: [
-          { value: 'me', label: 'わたし' },
-          { value: 'you', label: 'あなた' },
-        ],
-        deadline: new Date(),
-      },
+      client: client,
+      data: client.ticket.get(this.$route.params.id),
+      members: [
+        { value: '1', label: 'わたし' },
+        { value: '2', label: 'あなた' },
+        { value: '3', label: 'かれ' },
+      ],
       source: `# test
 
 ### subtitle

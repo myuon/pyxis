@@ -16,8 +16,8 @@
           <div class="login-state">
             <i class="material-icons">person_pin</i>
             <div class="user">
-              Login as Guest
-              <button class="action" type="mini">Sign in</button>
+              Login as {{ user.name }}
+              <button class="action" type="mini">Sign out</button>
             </div>
           </div>
 
@@ -54,20 +54,26 @@
       </el-aside>
 
       <el-main class="main">
-        <router-view/>
+        <router-view />
       </el-main>
     </el-container>
   </div>
 </template>
 
 <script>
+import { Client } from '@/client.js';
+
 export default {
-  components: {
-  },
   data () {
     return {
       activeItem: 'Home',
+      client: Client,
     };
+  },
+  computed: {
+    user: function () {
+      return this.client.user.me();
+    }
   },
 }
 </script>

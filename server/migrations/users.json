@@ -1,12 +1,21 @@
 [
   {
     "id": "1",
+    "sort": "detail",
     "name": "myuon",
     "display_name": "myuon_myon",
-    "created_at": "2018-10-15 00:00:00",
-    "projects": [
-      "1",
-      "2"
-    ]
+    "created_at": "2018-10-15 00:00:00"
+  },
+  {
+    "id": "1",
+    "sort": "project-abcd",
+    "title": "project AAA",
+    "tickets": [ "1", "2", "3", "4" ]
+  },
+  {
+    "id": "2",
+    "sort": "project-efgh",
+    "title": "project BBB",
+    "tickets": [ "5", "6", "7", "10" ]
   }
 ]

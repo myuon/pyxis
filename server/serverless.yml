@@ -36,10 +36,10 @@ custom:
     seed:
       development:
         sources:
-          - table: projects
-            sources: [ "./migrations/projects.json" ]
           - table: users
             sources: [ "./migrations/users.json" ]
+          - table: tickets
+            sources: [ "./migrations/tickets.json" ]
 
 functions:
   hello:
@@ -54,11 +54,11 @@ functions:
 
 resources:
   Resources:
-    ProjectTable:
+    UserTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
-        TableName: projects
+        TableName: users
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -72,16 +72,20 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    UserTable:
+    TicketTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
-        TableName: users
+        TableName: tickets
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+          - AttributeName: sort
+            KeyType: RANGE
         AttributeDefinitions:
           - AttributeName: id
+            AttributeType: S
+          - AttributeName: sort
             AttributeType: S
         ProvisionedThroughput:
           ReadCapacityUnits: 1

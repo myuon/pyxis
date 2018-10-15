@@ -68,12 +68,11 @@ export default {
     return {
       activeItem: 'Home',
       client: Client,
+      user: {},
     };
   },
-  computed: {
-    user: function () {
-      return this.client.user.me();
-    }
+  mounted: async function () {
+    this.user = await this.client.user.me();
   },
 }
 </script>

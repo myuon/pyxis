@@ -17,40 +17,11 @@ const getDBClient = (isOffline) => {
     : new AWS.DynamoDB.DocumentClient();
 };
 
-const ME = '1';
-
-module.exports.listRecent = async (event, context) => {
-  const isOffline = 'isOffline' in event && event.isOffline;
-  const db = getDBClient(isOffline);
-  const project = db.query({
-    TableName: 'users',
-    KeyConditionExpression: 'id = :id and begins_with(sort, :sort)',
-    ExpressionAttributeValues: {
-      ':id': ME,
-      ':sort': 'project',
-    }
-  }, (err, data) => {
-    return err != null ? err : data;
-  }).promise();
-
-  let list = (await project)['Items'];
-  return {
-    statusCode: 200,
-    body: JSON.stringify(list.map(item => {
-      return {
-        id: item.sort.replace('project-', ''),
-        title: item.title,
-        tickets: item.tickets,
-      };
-    })),
-  };
-};
-
 module.exports.get = async (event, context) => {
   const isOffline = 'isOffline' in event && event.isOffline;
   const db = getDBClient(isOffline);
   const project = db.query({
-    TableName: 'projects',
+    TableName: 'tickets',
     KeyConditionExpression: 'id = :id and sort = :sort',
     ExpressionAttributeValues: {
       ':id': event.pathParameters.id,

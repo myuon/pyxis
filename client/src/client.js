@@ -5,23 +5,12 @@ const endpoint = 'http://localhost:3000';
 export const Client = {
   user: {
     me: () => {
-      return { id: 'abcd', name: 'myuon' };
+      return axios.get(`${endpoint}/user/me`).then(res => res.data);
     },
   },
   project: {
     list_recent: () => {
-      return [
-        {
-          id: "abcd",
-          title: "project AAA",
-          tickets: [ "1", "2", "3", "4" ]
-        },
-        {
-          id: "efgh",
-          title: "project BBB",
-          tickets: [ "5", "6", "7", "10" ]
-        }
-      ];
+      return axios.get(`${endpoint}/project/recent`).then(res => res.data);
     },
   },
   ticket: {

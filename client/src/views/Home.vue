@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <div :key="project.id" v-for="project in client.project.list_recent()">
+    <div :key="project.id" v-for="project in recent">
       <h3>{{ project.title }}</h3>
 
       <el-card class="box-card" v-for="ticket in project.tickets">
@@ -29,13 +29,15 @@ import { Client } from '@/client';
 
 export default {
   name: 'home',
-  components: {
-  },
   data () {
     return {
       client: Client,
+      recent: [],
     };
   },
+  mounted: async function () {
+    this.recent = await this.client.project.list_recent();  
+  }
 }
 </script>
 

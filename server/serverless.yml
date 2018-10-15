@@ -51,6 +51,20 @@ functions:
       - http:
           path: /project/{id}
           method: get
+  listRecentProject:
+    handler: src/functions/project.listRecent
+    events:
+      - http:
+          path: /project/recent
+          method: get
+
+  getMe:
+    handler: src/functions/user.getMe
+    events:
+      - http:
+          path: /user/me
+          method: get
+          cors: true
 
 resources:
   Resources:

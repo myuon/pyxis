@@ -59,7 +59,7 @@
           </template>
 
           <el-tabs v-model="currentPage">
-            <el-tab-pane :label="page.title" :name="index.toString()" v-for="(page, index) in data.pages">
+            <el-tab-pane :label="page.title" :key="index" :name="index.toString()" v-for="(page, index) in data.pages">
               <div class="float">
                 <el-button-group class="markdown-mode">
                   <el-button @click="setMode('view')" :class="{ current: isView }" type="default" size="mini"><i class="material-icons">visibility</i></el-button>

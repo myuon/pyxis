@@ -10,6 +10,10 @@
     cssnano-preset-default "^4.0.0"
     postcss "^7.0.0"
 
+"@korzio/djv-draft-04@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@korzio/djv-draft-04/-/djv-draft-04-2.0.1.tgz#2984289426cac5ed622b26a58c3af8584aefbdfe"
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -1491,6 +1495,12 @@ dir-glob@^2.0.0:
   dependencies:
     arrify "^1.0.1"
     path-type "^3.0.0"
+
+djv@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/djv/-/djv-2.1.1.tgz#7d462f24780c90222bea59115d650d8510a5c38a"
+  optionalDependencies:
+    "@korzio/djv-draft-04" "^2.0.1"
 
 dns-equal@^1.0.0:
   version "1.0.0"
@@ -4116,6 +4126,11 @@ punycode@2.x.x, punycode@^2.1.0:
 punycode@^1.2.4, punycode@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
+
+"pyxis-lib@file:../lib":
+  version "1.0.0"
+  dependencies:
+    djv "^2.1.1"
 
 q@^1.1.2:
   version "1.5.1"

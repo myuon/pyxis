@@ -3,7 +3,7 @@
     <div :key="project.id" v-for="project in recent">
       <h3>{{ project.title }}</h3>
 
-      <el-card class="box-card" v-for="ticket in project.tickets">
+      <el-card class="box-card" :key="ticket" v-for="ticket in project.tickets">
         <div slot="header" class="clearfix">
           <span><strong>#{{ ticket }}</strong> Something happened!</span>
           <el-button style="float: right; padding: 3px 0" type="text">Operation button</el-button>

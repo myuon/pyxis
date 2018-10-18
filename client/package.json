@@ -12,7 +12,8 @@
     "material-icons": "^0.2.3",
     "vue": "^2.5.17",
     "vue-markdown": "^2.2.4",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "pyxis-lib": "file:../lib"
   },
   "devDependencies": {
     "@vue/cli-service": "^3.0.3",

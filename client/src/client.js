@@ -1,4 +1,5 @@
 import axios from 'axios';
+import schema from 'pyxis-lib';
 
 const endpoint = 'http://localhost:3000';
 

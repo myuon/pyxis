@@ -84,7 +84,7 @@
             <span class="collapse-title">Comments</span>
           </template>
 
-          <el-row class="comment-feed" justify="space-between" :key="comment.id" v-for="comment in data.comment">
+          <el-row class="comment-feed" justify="space-between" :key="comment.id" v-for="comment in data.comments">
             <div class="meta">
               <span class="timestamp">#{{ comment.id }} [{{ comment.created_at }}]</span>
             </div>

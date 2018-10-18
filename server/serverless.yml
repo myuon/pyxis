@@ -49,34 +49,34 @@ functions:
     handler: src/functions/project.listRecent
     events:
       - http:
-          path: /project/recent
+          path: /projects/recent
           method: get
   getProject:
     handler: src/functions/project.get
     events:
       - http:
-          path: /project/{id}
+          path: /projects/{id}
           method: get
 
   getTicket:
     handler: src/functions/ticket.get
     events:
       - http:
-          path: /project/{projectId}/ticket/{ticketId}
+          path: /projects/{projectId}/tickets/{ticketId}
           method: get
 
   listComment:
     handler: src/functions/comment.list
     events:
       - http:
-          path: /project/{projectId}/ticket/{ticketId}/comment/
+          path: /projects/{projectId}/tickets/{ticketId}/comments/
           method: get
 
   getMe:
     handler: src/functions/user.getMe
     events:
       - http:
-          path: /user/me
+          path: /users/me
           method: get
           cors: true
 

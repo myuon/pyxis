@@ -58,25 +58,29 @@
             <span class="collapse-title">Content</span>
           </template>
 
-          <div class="float">
-            <el-button-group class="markdown-mode">
-              <el-button @click="setMode('view')" :class="{ current: isView }" type="default" size="mini"><i class="material-icons">visibility</i></el-button>
-              <el-button @click="setMode('edit')" :class="{ current: isEdit }" type="default" size="mini"><i class="material-icons">edit</i></el-button>
-            </el-button-group>
-          </div>
+          <el-tabs v-model="currentPage">
+            <el-tab-pane :label="page.title" :name="index.toString()" v-for="(page, index) in data.pages">
+              <div class="float">
+                <el-button-group class="markdown-mode">
+                  <el-button @click="setMode('view')" :class="{ current: isView }" type="default" size="mini"><i class="material-icons">visibility</i></el-button>
+                  <el-button @click="setMode('edit')" :class="{ current: isEdit }" type="default" size="mini"><i class="material-icons">edit</i></el-button>
+                </el-button-group>
+              </div>
 
-          <el-input
-            type="textarea"
-            :rows="15"
-            placeholder="Please input"
-            v-model="source"
-            v-if="md_mode === 'edit'"
-          />
-          <vue-markdown
-            :source="source"
-            class="markdown-view"
-            v-if="md_mode === 'view'"
-          />
+              <el-input
+                type="textarea"
+                :rows="15"
+                placeholder="Please input"
+                v-model="page.content"
+                v-if="md_mode === 'edit'"
+              />
+              <vue-markdown
+                :source="page.content"
+                class="markdown-view"
+                v-if="md_mode === 'view'"
+              />
+            </el-tab-pane>
+          </el-tabs>
         </el-collapse-item>
 
         <el-collapse-item name="3">
@@ -135,6 +139,7 @@ export default {
         { value: '2', label: 'あなた' },
         { value: '3', label: 'かれ' },
       ],
+      currentPage: '0',
       source: `# test
 
 ### subtitle

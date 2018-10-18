@@ -4,6 +4,7 @@ plugins:
   - serverless-plugin-tracing
   - serverless-dynamodb-local
   - serverless-offline
+
 provider:
   name: aws
   runtime: nodejs8.10
@@ -11,7 +12,6 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: us-east-1
   tracing: true
-
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -63,6 +63,13 @@ functions:
     events:
       - http:
           path: /projects/{projectId}/tickets/{ticketId}
+          method: get
+
+  listPages:
+    handler: src/functions/page.get
+    events:
+      - http:
+          path: /projects/{projectId}/tickets/{ticketId}/pages
           method: get
 
   listComment:

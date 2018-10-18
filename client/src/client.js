@@ -16,8 +16,10 @@ export const Client = {
   ticket: {
     get: async (projectId, ticketId) => {
       const ticket = (await axios.get(`${endpoint}/projects/${projectId}/tickets/${ticketId}`)).data;
+      const pages = (await axios.get(`${endpoint}/projects/${projectId}/tickets/${ticketId}/pages`)).data;
       const comments = (await axios.get(`${endpoint}/projects/${projectId}/tickets/${ticketId}/comments`)).data;
       ticket.comments = comments;
+      ticket.pages = pages;
       return ticket;
     },
   },

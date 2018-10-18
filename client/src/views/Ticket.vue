@@ -2,11 +2,11 @@
   <div class="container">
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span># {{ $route.params.id }}</span>
-        <el-button style="float: right; padding: 3px 0" type="text">Operation button</el-button>
+        <span>{{ $route.params.projectId }} > #{{ $route.params.ticketId }}</span>
+        <el-button @click="$router.push('/')" style="float: right; padding: 3px 0" type="text">Back to List</el-button>
       </div>
 
-      <h2>Something happened!</h2>
+      <h2>{{ data.title }}</h2>
 
       <el-collapse v-model="active_tabs" class="ticket-data">
         <el-collapse-item name="1">
@@ -84,7 +84,7 @@
             <span class="collapse-title">Comments</span>
           </template>
 
-          <el-row class="comment-feed" justify="space-between" :key="comment.id" v-for="comment in client.comment.get(data.id).fetch(10)">
+          <el-row class="comment-feed" justify="space-between" :key="comment.id" v-for="comment in data.comment">
             <div class="meta">
               <span class="timestamp">#{{ comment.id }} [{{ comment.created_at }}]</span>
             </div>
@@ -95,7 +95,7 @@
 
             <el-col :span="11">
               <div class="comment">
-                <span class="summary">@{{ comment.created_by }} commented:</span>
+                <span class="summary">@{{ comment.owner }} commented:</span>
                 <vue-markdown :source="comment.content" />
               </div>
             </el-col>
@@ -129,7 +129,7 @@ export default {
 
     return {
       client: client,
-      data: client.ticket.get(this.$route.params.id),
+      data: {},
       members: [
         { value: '1', label: 'わたし' },
         { value: '2', label: 'あなた' },
@@ -155,6 +155,9 @@ Newline.
     setMode (mode) {
       this.md_mode = mode;
     }
+  },
+  mounted: async function () {
+    this.data = await this.client.ticket.get(this.$route.params.projectId, this.$route.params.ticketId);
   },
 }
 </script>

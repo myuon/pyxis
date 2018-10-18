@@ -44,18 +44,32 @@ custom:
 functions:
   hello:
     handler: src/functions/echo.handler
-  
+
+  listRecentProject:
+    handler: src/functions/project.listRecent
+    events:
+      - http:
+          path: /project/recent
+          method: get
   getProject:
     handler: src/functions/project.get
     events:
       - http:
           path: /project/{id}
           method: get
-  listRecentProject:
-    handler: src/functions/project.listRecent
+
+  getTicket:
+    handler: src/functions/ticket.get
     events:
       - http:
-          path: /project/recent
+          path: /project/{projectId}/ticket/{ticketId}
+          method: get
+
+  listComment:
+    handler: src/functions/comment.list
+    events:
+      - http:
+          path: /project/{projectId}/ticket/{ticketId}/comment/
           method: get
 
   getMe:

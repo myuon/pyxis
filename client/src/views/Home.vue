@@ -5,7 +5,7 @@
 
       <el-card class="box-card" v-for="ticket in project.tickets">
         <div slot="header" class="clearfix">
-          <span><strong>#3028</strong> Something happened!</span>
+          <span><strong>#{{ ticket }}</strong> Something happened!</span>
           <el-button style="float: right; padding: 3px 0" type="text">Operation button</el-button>
         </div>
         <div class="text item">
@@ -17,7 +17,7 @@
         </div>
 
         <div class="footer">
-          <el-button @click="$router.push(`/ticket/${ticket}`)" type="primary" size="small">Open</el-button>
+          <el-button @click="$router.push(`${project.id}/ticket/${ticket}`)" type="primary" size="small">Open #{{ ticket }}</el-button>
         </div>
       </el-card>
     </div>

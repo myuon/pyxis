@@ -14,36 +14,12 @@ export const Client = {
     },
   },
   ticket: {
-    get: (id) => {
-      return {
-        id: "abcd-ABCD",
-        title: "some bug reported!",
-        assigned_to: [ "1", "2" ],
-        deadline: "2018-10-30",
-      };
+    get: async (projectId, ticketId) => {
+      const ticket = (await axios.get(`${endpoint}/project/${projectId}/ticket/${ticketId}`)).data;
+      const comment = (await axios.get(`${endpoint}/project/${projectId}/ticket/${ticketId}/comment`)).data;
+      ticket.comment = comment;
+      return ticket;
     },
   },
-  comment: {
-    get: (id) => {
-      return {
-        fetch: () => {
-          return [
-            {
-              id: "1",
-              content: "This is a sample comment.",
-              created_by: "1",
-              created_at: "2018-10-13 18:30:14",
-            },
-            {
-              id: "2",
-              content: "- hoge\n- piyo\n- nyan",
-              created_by: "1",
-              created_at: "2018-10-15 09:10:24",
-            },
-          ]
-        },
-      };
-    },
-  }
 };
 

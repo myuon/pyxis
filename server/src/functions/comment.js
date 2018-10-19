@@ -1,5 +1,7 @@
 'use strict';
 
+const lib = require('pyxis-lib');
+
 const getSDK = (isOffline) => {
   return isOffline
     ? require('aws-sdk')
@@ -34,13 +36,13 @@ module.exports.list = async (event, context) => {
   return {
     statusCode: 200,
     body: JSON.stringify((await result)['Items'].map(item => {
-      return {
+      return lib.validate(lib.comment, {
         id: item.sort.split('-')[1],
         content: item.content,
         created_at: item.detail.created_at,
         owner: item.detail.owner,
         belongs_to: item.id,
-      };
+      });
     })),
   };
 };

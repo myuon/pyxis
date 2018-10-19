@@ -1,5 +1,7 @@
 'use strict';
 
+const lib = require('pyxis-lib');
+
 const getSDK = (isOffline) => {
   return isOffline
     ? require('aws-sdk')
@@ -34,10 +36,10 @@ module.exports.get = async (event, context) => {
   let ticket = (await result)['Items'][0];
   return {
     statusCode: 200,
-    body: JSON.stringify({
+    body: JSON.stringify(lib.validate(lib.ticket, {
       id: ticket.id,
       title: ticket.title,
       assigned_to: ticket.detail.assigned_to,
-    }),
+    })),
   };
 };

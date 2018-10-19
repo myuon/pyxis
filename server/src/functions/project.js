@@ -1,5 +1,7 @@
 'use strict';
 
+const lib = require('pyxis-lib');
+
 const getSDK = (isOffline) => {
   return isOffline
     ? require('aws-sdk')
@@ -37,11 +39,11 @@ module.exports.listRecent = async (event, context) => {
   return {
     statusCode: 200,
     body: JSON.stringify(list.map(item => {
-      return {
+      return lib.validate(lib.project, {
         id: item.sort.replace('project-', ''),
         title: item.title,
         tickets: item.tickets,
-      };
+      });
     })),
   };
 };
@@ -62,6 +64,6 @@ module.exports.get = async (event, context) => {
 
   return {
     statusCode: 200,
-    body: JSON.stringify((await project)['Items'][0]),
+    body: JSON.stringify(lib.validate(lib.project, (await project)['Items'][0])),
   };
 };

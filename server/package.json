@@ -5,7 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.337.0",
-    "aws-xray-sdk": "^2.0.0"
+    "aws-xray-sdk": "^2.0.0",
+    "pyxis-lib": "file:../lib"
   },
   "devDependencies": {
     "serverless-dynamodb-local": "^0.2.35",

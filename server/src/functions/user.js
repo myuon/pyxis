@@ -1,5 +1,7 @@
 'use strict';
 
+const lib = require('pyxis-lib');
+
 const getSDK = (isOffline) => {
   return isOffline
     ? require('aws-sdk')
@@ -36,6 +38,6 @@ module.exports.getMe = async (event, context) => {
   return {
     statusCode: 200,
     headers: { 'Access-Control-Allow-Origin': '*' },
-    body: JSON.stringify((await result)['Items'][0]),
+    body: JSON.stringify(lib.validate(lib.user, (await result)['Items'][0])),
   };
 };

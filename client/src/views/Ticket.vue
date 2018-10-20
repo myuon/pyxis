@@ -6,7 +6,7 @@
         <el-button @click="$router.push('/')" style="float: right; padding: 3px 0" type="text">Back to List</el-button>
       </div>
 
-      <h2>{{ data.title }}</h2>
+      <h2>{{ ticket.title }}</h2>
 
       <el-collapse v-model="active_tabs" class="ticket-data">
         <el-collapse-item name="1">
@@ -18,7 +18,7 @@
             <span>Ticket number</span>
             <el-input
               disabled
-              v-model="data.id">
+              v-model="ticket.id">
             </el-input>
           </div>
 
@@ -26,7 +26,7 @@
             <span>Assigned to</span>
 
             <el-select
-              v-model="data.assigned_to"
+              v-model="ticket.assigned_to"
               multiple
               collapse-tags
               placeholder="Select"
@@ -44,7 +44,7 @@
             <span>Deadline</span>
 
             <el-date-picker
-              v-model="data.deadline"
+              v-model="ticket.deadline"
               type="date"
               placeholder="Pick a day"
               style="width: 100%;">
@@ -59,7 +59,7 @@
           </template>
 
           <el-tabs v-model="currentPage">
-            <el-tab-pane :label="page.title" :key="index" :name="index.toString()" v-for="(page, index) in data.pages">
+            <el-tab-pane :label="page.title" :key="index" :name="index.toString()" v-for="(page, index) in ticket.pages">
               <div class="float">
                 <el-button-group class="markdown-mode">
                   <el-button @click="setMode('view')" :class="{ current: isView }" type="default" size="mini"><i class="material-icons">visibility</i></el-button>
@@ -88,7 +88,7 @@
             <span class="collapse-title">Comments</span>
           </template>
 
-          <el-row class="comment-feed" justify="space-between" :key="comment.id" v-for="comment in data.comments">
+          <el-row class="comment-feed" justify="space-between" :key="comment.id" v-for="comment in comments">
             <div class="meta">
               <span class="timestamp">#{{ comment.id }} [{{ comment.created_at }}]</span>
             </div>
@@ -97,10 +97,29 @@
               <i class="material-icons">person</i>
             </el-col>
 
-            <el-col :span="11">
+            <el-col :offset="1" :span="11">
               <div class="comment">
                 <span class="summary">@{{ comment.owner }} commented:</span>
                 <vue-markdown :source="comment.content" />
+              </div>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col :span="1" class="icon">
+              <i class="material-icons">person</i>
+            </el-col>
+
+            <el-col :offset="1" :span="11">
+              <div class="comment">
+                <el-input
+                  type="textarea"
+                  :rows="3"
+                  placeholder="Please input"
+                  v-model="newCommentText"
+                />
+
+                <el-button @click="submitComment" type="success" size="small">Submit</el-button>
               </div>
             </el-col>
           </el-row>
@@ -133,36 +152,35 @@ export default {
 
     return {
       client: client,
-      data: {},
       members: [
         { value: '1', label: 'わたし' },
         { value: '2', label: 'あなた' },
         { value: '3', label: 'かれ' },
       ],
       currentPage: '0',
-      source: `# test
-
-### subtitle
-
-hoge
-
-This is a paragraph.
-Newline.
-
-- a
-- b
-      `,
       md_mode: 'view',
       active_tabs: [ '1', '2', '3' ],
+      ticket: {},
+      comments: [],
+      newCommentText: '',
     }
   },
   methods: {
     setMode (mode) {
       this.md_mode = mode;
-    }
+    },
+    submitComment: async function () {
+      await this.client.comment.create(this.$route.params.projectId, this.$route.params.ticketId, this.newCommentText);
+      this.newCommentText = '';
+      await this.loadComments();
+    },
+    loadComments: async function () {
+      this.comments = await this.client.comment.list(this.$route.params.projectId, this.$route.params.ticketId);
+    },
   },
   mounted: async function () {
-    this.data = await this.client.ticket.get(this.$route.params.projectId, this.$route.params.ticketId);
+    this.ticket = await this.client.ticket.get(this.$route.params.projectId, this.$route.params.ticketId);
+    await this.loadComments();
   },
 }
 </script>
@@ -223,7 +241,7 @@ h2 {
   background-color: #eee;
 }
 
-.comment-feed .icon i {
+.icon i {
   font-size: 36px;
   padding: 6px;
   background-color: #ccc;
@@ -238,10 +256,6 @@ h2 {
 
 .comment-feed .meta {
   margin-bottom: 10px;
-}
-
-.comment-feed .comment {
-  margin-left: 10px;
 }
 
 .comment-feed .comment .summary {

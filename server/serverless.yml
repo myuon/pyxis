@@ -45,7 +45,7 @@ functions:
   hello:
     handler: src/functions/echo.handler
 
-  listRecentProject:
+  listRecentProjects:
     handler: src/functions/project.listRecent
     events:
       - http:
@@ -72,11 +72,17 @@ functions:
           path: /projects/{projectId}/tickets/{ticketId}/pages
           method: get
 
-  listComment:
+  createComment:
+    handler: src/functions/comment.create
+    events:
+      - http:
+          path: /projects/{projectId}/tickets/{ticketId}/comments
+          method: post
+  listComments:
     handler: src/functions/comment.list
     events:
       - http:
-          path: /projects/{projectId}/tickets/{ticketId}/comments/
+          path: /projects/{projectId}/tickets/{ticketId}/comments
           method: get
 
   getMe:

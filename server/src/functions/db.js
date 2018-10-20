@@ -13,7 +13,7 @@ const db = process.env.IS_OFFLINE
 
 const wrap = async (req) => {
   return await req.promise().catch(err => {
-    console.error(`[PyxisError]: ${JSON.stringify(err)}`);
+    console.error(`[PyxisError]: ${err}`);
     throw new Error(JSON.stringify(err));
   });
 };
@@ -35,6 +35,32 @@ const convert = {
         title: ticket.title,
         assigned_to: ticket.assigned_to,
         comment: ticket.comment,
+      };
+    },
+    asAttribute: (label, value) => {
+      return {
+        [label]: {
+          Action: 'PUT',
+          Value: value,
+        }
+      };
+    },
+  },
+  page: {
+    fromJSON: (json) => {
+      return lib.validate(lib.page, {
+        id: json.sort.split('-')[1],
+        title: json.title,
+        content: json.content,
+        belongs_to: json.id,
+      });
+    },
+    toJSON: (page) => {
+      return {
+        id: ticket.belongs_to,
+        sort: `page-${page.id}`,
+        title: page.title,
+        content: page.content,
       };
     },
     asAttribute: (label, value) => {
@@ -122,18 +148,21 @@ const tables = {
       return res;
     },
   },
-  comment: {
-    get: async (projectId, ticketId) => {
-      const res = await wrap(db.get({
+  page: {
+    list: async (projectId, ticketId) => {
+      const res = await wrap(db.query({
         TableName: 'tickets',
-        Key: {
-          id: `${projectId}-${ticketId}`,
-          sort: 'detail'
+        KeyConditionExpression: 'id = :id and begins_with(sort, :sort)',
+        ExpressionAttributeValues: {
+          ':id': `${projectId}-${ticketId}`,
+          ':sort': 'page',
         }
       }));
 
-      return convert.comment.fromJSON(res['Item']);
+      return res['Items'].map(item => convert.page.fromJSON(item));
     },
+  },
+  comment: {
     list: async (projectId, ticketId) => {
       const res = await wrap(db.query({
         TableName: 'tickets',
@@ -145,18 +174,6 @@ const tables = {
       }));
 
       return res['Items'].map(item => convert.comment.fromJSON(item));
-    },
-    update: async (projectId, ticketId, label, value) => {
-      const res = await wrap(db.update({
-        TableName: 'tickets',
-        Key: {
-          id: `${projectId}-${ticketId}`,
-          sort: 'detail',
-        },
-        AttributeUpdates: convert.comment.asAttribute(label, value),
-      }));
-
-      return res;
     },
     create: async (projectId, ticketId, item) => {
       const res = await wrap(db.put({

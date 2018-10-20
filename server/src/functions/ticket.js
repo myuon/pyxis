@@ -15,7 +15,6 @@ module.exports.get = async (event, context) => {
       body: JSON.stringify(result),
     };
   } catch (err) {
-    console.error(err);
     return {
       statusCode: 500,
       body: JSON.stringify(err),

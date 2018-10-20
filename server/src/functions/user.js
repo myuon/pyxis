@@ -2,28 +2,18 @@
 
 const lib = require('pyxis-lib');
 
-const getSDK = (isOffline) => {
-  return isOffline
-    ? require('aws-sdk')
-    : require('aws-xray-sdk-core').captureAWS(require('aws-sdk'));
-};
-
-const getDBClient = (isOffline) => {
-  const AWS = getSDK(isOffline);
-
-  return isOffline
-    ? new AWS.DynamoDB.DocumentClient({
-      region: 'localhost',
-      endpoint: 'http://localhost:8000'
-    })
-    : new AWS.DynamoDB.DocumentClient();
-};
+const xray = (sdk) => process.env.IS_OFFLINE ? sdk : require('aws-xray-sdk-core').captureAWS(sdk);
+const AWS = xray(require('aws-sdk'));
+const db = process.env.IS_OFFLINE
+  ? new AWS.DynamoDB.DocumentClient({
+    region: 'localhost',
+    endpoint: 'http://localhost:8000'
+  })
+  : new AWS.DynamoDB.DocumentClient();
 
 const ME = '1';
 
 module.exports.getMe = async (event, context) => {
-  const isOffline = 'isOffline' in event && event.isOffline;
-  const db = getDBClient(isOffline);
   const result = db.query({
     TableName: 'users',
     KeyConditionExpression: 'id = :id and sort = :sort',

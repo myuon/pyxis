@@ -17,7 +17,7 @@
         </div>
 
         <div class="footer">
-          <el-button @click="$router.push(`${project.id}/ticket/${ticket}`)" type="primary" size="small">Open #{{ ticket }}</el-button>
+          <el-button @click="$router.push(`/ticket/${ticket}`)" type="primary" size="small">Open #{{ ticket }}</el-button>
         </div>
       </el-card>
     </div>

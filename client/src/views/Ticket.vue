@@ -2,7 +2,7 @@
   <div class="container">
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span>{{ $route.params.projectId }} > #{{ $route.params.ticketId }}</span>
+        <span>{{ ticket.belongs_to.project }} > #{{ ticket.id }}</span>
         <el-button @click="$router.push('/')" style="float: right; padding: 3px 0" type="text">Back to List</el-button>
       </div>
 

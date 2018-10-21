@@ -15,16 +15,16 @@ export const Client = {
     },
   },
   ticket: {
-    get: async (projectId, ticketId) => {
-      const ticket = lib.validate(lib.ticket, (await axios.get(`${endpoint}/projects/${projectId}/tickets/${ticketId}`)).data);
-      const pages = lib.validate({ type: 'array', items: lib.page }, (await axios.get(`${endpoint}/projects/${projectId}/tickets/${ticketId}/pages`)).data);
+    get: async (ticketId) => {
+      const ticket = lib.validate(lib.ticket, (await axios.get(`${endpoint}/tickets/${ticketId}`)).data);
+      const pages = lib.validate({ type: 'array', items: lib.page }, (await axios.get(`${endpoint}/tickets/${ticketId}/pages`)).data);
       ticket.pages = pages;
       return ticket;
     },
   },
   comment: {
-    list: async (projectId, ticketId) => {
-      return lib.validate({ type: 'array', items: lib.comment }, (await axios.get(`${endpoint}/projects/${projectId}/tickets/${ticketId}/comments`)).data);
+    list: async (ticketId) => {
+      return lib.validate({ type: 'array', items: lib.comment }, (await axios.get(`${endpoint}/tickets/${ticketId}/comments`)).data);
     },
     create: async (projectId, ticketId, content) => {
       const comment = {
@@ -38,7 +38,7 @@ export const Client = {
         },
       };
 
-      await axios.post(`${endpoint}/projects/${projectId}/tickets/${ticketId}/comments`, lib.validate(lib.comment, comment));
+      await axios.post(`${endpoint}/comments`, lib.validate(lib.comment, comment));
     }
   }
 };

@@ -6,7 +6,6 @@ const db = require('./db').tables;
 module.exports.get = async (event, context) => {
   try {
     const result = await db.page.list(
-      event.pathParameters.projectId,
       event.pathParameters.ticketId,
     );
 

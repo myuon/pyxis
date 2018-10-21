@@ -170,16 +170,16 @@ export default {
       this.md_mode = mode;
     },
     submitComment: async function () {
-      await this.client.comment.create(this.$route.params.projectId, this.$route.params.ticketId, this.newCommentText);
+      await this.client.comment.create(this.ticket.belongs_to.project, this.$route.params.ticketId, this.newCommentText);
       this.newCommentText = '';
       await this.loadComments();
     },
     loadComments: async function () {
-      this.comments = await this.client.comment.list(this.$route.params.projectId, this.$route.params.ticketId);
+      this.comments = await this.client.comment.list(this.$route.params.ticketId);
     },
   },
   mounted: async function () {
-    this.ticket = await this.client.ticket.get(this.$route.params.projectId, this.$route.params.ticketId);
+    this.ticket = await this.client.ticket.get(this.$route.params.ticketId);
     await this.loadComments();
   },
 }

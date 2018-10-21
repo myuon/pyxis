@@ -26,7 +26,9 @@ const convert = {
         title: json.title,
         assigned_to: json.assigned_to,
         comment: json.comment,
-        belongs_to: json.belongs_to,
+        belongs_to: {
+          project: json.belongs_to.project,
+        },
       });
     },
     toJSON: (ticket) => {
@@ -36,7 +38,9 @@ const convert = {
         title: ticket.title,
         assigned_to: ticket.assigned_to,
         comment: ticket.comment,
-        belongs_to: ticket.belongs_to
+        belongs_to: {
+          project: ticket.belongs_to.project,
+        }
       };
     },
     asAttribute: (label, value) => {
@@ -118,7 +122,7 @@ const convert = {
 
 const tables = {
   ticket: {
-    get: async (projectId, ticketId) => {
+    get: async (ticketId) => {
       const res = await wrap(db.get({
         TableName: 'tickets',
         Key: {
@@ -129,7 +133,7 @@ const tables = {
 
       return convert.ticket.fromJSON(res['Item']);
     },
-    list: async (projectId, ticketId) => {
+    list: async (ticketId) => {
       const res = await wrap(db.query({
         TableName: 'tickets',
         KeyConditionExpression: 'id = :id and begins_with(sort, :sort)',
@@ -141,7 +145,7 @@ const tables = {
 
       return res['Items'].map(item => convert.ticket.fromJSON(item));
     },
-    update: async (projectId, ticketId, label, value) => {
+    update: async (ticketId, label, value) => {
       const res = await wrap(db.update({
         TableName: 'tickets',
         Key: {
@@ -153,17 +157,9 @@ const tables = {
 
       return res;
     },
-    create: async (projectId, ticketId, item) => {
-      const res = await wrap(db.put({
-        TableName: 'tickets',
-        Item: convert.ticket.toJSON(item),
-      }));
-
-      return res;
-    },
   },
   page: {
-    list: async (projectId, ticketId) => {
+    list: async (ticketId) => {
       const res = await wrap(db.query({
         TableName: 'tickets',
         KeyConditionExpression: 'id = :id and begins_with(sort, :sort)',
@@ -177,7 +173,7 @@ const tables = {
     },
   },
   comment: {
-    list: async (projectId, ticketId) => {
+    list: async (ticketId) => {
       const res = await wrap(db.query({
         TableName: 'tickets',
         KeyConditionExpression: 'id = :id and begins_with(sort, :sort)',
@@ -189,7 +185,7 @@ const tables = {
 
       return res['Items'].map(item => convert.comment.fromJSON(item));
     },
-    create: async (projectId, ticketId, item) => {
+    create: async (item) => {
       const res = await wrap(db.put({
         TableName: 'tickets',
         Item: convert.comment.toJSON(item),

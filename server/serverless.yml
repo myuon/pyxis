@@ -62,27 +62,27 @@ functions:
     handler: src/functions/ticket.get
     events:
       - http:
-          path: /projects/{projectId}/tickets/{ticketId}
+          path: /tickets/{ticketId}
           method: get
 
   listPages:
     handler: src/functions/page.get
     events:
       - http:
-          path: /projects/{projectId}/tickets/{ticketId}/pages
+          path: /tickets/{ticketId}/pages
           method: get
 
   createComment:
     handler: src/functions/comment.create
     events:
       - http:
-          path: /projects/{projectId}/tickets/{ticketId}/comments
+          path: /comments
           method: post
   listComments:
     handler: src/functions/comment.list
     events:
       - http:
-          path: /projects/{projectId}/tickets/{ticketId}/comments
+          path: /tickets/{ticketId}/comments
           method: get
 
   getMe:

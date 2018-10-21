@@ -6,16 +6,17 @@ const db = require('./db').tables;
 module.exports.create = async (event, context) => {
   try {
     const comment = lib.validate(lib.comment, JSON.parse(event.body));
-    const ticketInfo = await db.comment.get(
+    const ticketInfo = await db.ticket.get(
       event.pathParameters.projectId,
       event.pathParameters.ticketId,
     );
-    ticketInfo.comment = (parseInt(ticketInfo.comment, 10) + 1).toString();
+    ticketInfo.comment = ticketInfo.comment + 1;
+    comment.id = ticketInfo.comment.toString();
 
     await db.comment.create(
       event.pathParameters.projectId,
       event.pathParameters.ticketId,
-      ticketInfo,
+      comment,
     );
     await db.ticket.update(
       event.pathParameters.projectId,

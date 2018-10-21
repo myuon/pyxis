@@ -22,19 +22,21 @@ const convert = {
   ticket: {
     fromJSON: (json) => {
       return lib.validate(lib.ticket, {
-        id: json.id.split('-')[1],
+        id: json.id,
         title: json.title,
         assigned_to: json.assigned_to,
         comment: json.comment,
+        belongs_to: json.belongs_to,
       });
     },
     toJSON: (ticket) => {
       return {
-        id: ticket.belongs_to,
+        id: ticket.id,
         sort: 'detail',
         title: ticket.title,
         assigned_to: ticket.assigned_to,
         comment: ticket.comment,
+        belongs_to: ticket.belongs_to
       };
     },
     asAttribute: (label, value) => {
@@ -52,15 +54,21 @@ const convert = {
         id: json.sort.split('-')[1],
         title: json.title,
         content: json.content,
-        belongs_to: json.id,
+        belongs_to: {
+          project: json.belongs_to.project,
+          ticket: json.id,
+        },
       });
     },
     toJSON: (page) => {
       return {
-        id: ticket.belongs_to,
+        id: page.belongs_to.ticket,
         sort: `page-${page.id}`,
         title: page.title,
         content: page.content,
+        belongs_to: {
+          project: json.belongs_to.project,
+        }
       };
     },
     asAttribute: (label, value) => {
@@ -79,16 +87,22 @@ const convert = {
         content: json.content,
         created_at: json.created_at,
         owner: json.owner,
-        belongs_to: json.id,
+        belongs_to: {
+          project: json.belongs_to.project,
+          ticket: json.id,
+        },
       });
     },
     toJSON: (comment) => {
       return {
-        id: comment.belongs_to,
+        id: comment.belongs_to.ticket,
         sort: `comment-${comment.id}`,
         content: comment.content,
         owner: comment.owner,
         created_at: comment.created_at,
+        belongs_to: {
+          project: comment.belongs_to.project,
+        },
       }
     },
     asAttribute: (label, value) => {
@@ -108,7 +122,7 @@ const tables = {
       const res = await wrap(db.get({
         TableName: 'tickets',
         Key: {
-          id: `${projectId}-${ticketId}`,
+          id: ticketId,
           sort: 'detail'
         }
       }));
@@ -120,7 +134,7 @@ const tables = {
         TableName: 'tickets',
         KeyConditionExpression: 'id = :id and begins_with(sort, :sort)',
         ExpressionAttributeValues: {
-          ':id': `${projectId}-${ticketId}`,
+          ':id': ticketId,
           ':sort': `comment`,
         }
       }));
@@ -131,7 +145,7 @@ const tables = {
       const res = await wrap(db.update({
         TableName: 'tickets',
         Key: {
-          id: `${projectId}-${ticketId}`,
+          id: ticketId,
           sort: 'detail',
         },
         AttributeUpdates: convert.ticket.asAttribute(label, value),
@@ -154,7 +168,7 @@ const tables = {
         TableName: 'tickets',
         KeyConditionExpression: 'id = :id and begins_with(sort, :sort)',
         ExpressionAttributeValues: {
-          ':id': `${projectId}-${ticketId}`,
+          ':id': ticketId,
           ':sort': 'page',
         }
       }));
@@ -168,7 +182,7 @@ const tables = {
         TableName: 'tickets',
         KeyConditionExpression: 'id = :id and begins_with(sort, :sort)',
         ExpressionAttributeValues: {
-          ':id': `${projectId}-${ticketId}`,
+          ':id': ticketId,
           ':sort': 'comment',
         }
       }));

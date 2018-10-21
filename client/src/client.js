@@ -32,7 +32,10 @@ export const Client = {
         content: content,
         created_at: (new Date()).toLocaleString('ja-JP'),
         owner: '1',
-        belongs_to: '',
+        belongs_to: {
+          project: projectId,
+          ticket: ticketId,
+        },
       };
 
       await axios.post(`${endpoint}/projects/${projectId}/tickets/${ticketId}/comments`, lib.validate(lib.comment, comment));

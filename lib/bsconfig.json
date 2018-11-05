@@ -11,6 +11,5 @@
   },
   "suffix": ".bs.js",
   "bs-dependencies": [
-    "@glennsl/bs-json"
   ]
 }

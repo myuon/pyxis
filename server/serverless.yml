@@ -86,7 +86,7 @@ functions:
           method: get
 
   getMe:
-    handler: src/functions/user.getMe
+    handler: src/functions/User.bs.getMe
     events:
       - http:
           path: /users/me

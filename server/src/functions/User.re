@@ -1,18 +1,37 @@
 let me = "1";
 
-let getMe : AwsLambda.APIGatewayProxy.handler = (_event, _context, cb) => {
+let getMe = (_event, _context) => {
   open AwsLambda.APIGatewayProxy;
 
   DB.User.query(DB.User.me)
-    |> Js.Promise.then_(result => {
-      Js.log(result);
-
-      cb(Js.null, Result.make(
+    |> Js.Promise.then_((result : DB.QueryResult.t(Entity.User.t)) => {
+      Js.log(result.items[0] |> Entity.User.encode);
+      Js.log(Result.make(
         ~statusCode=200,
         ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Json.stringify(result),
+        ~body=Js.Json.stringify(result.items[0] |> Entity.User.encode),
         ()
       ));
-      Js.Promise.resolve();
+
+      let result = Result.make(
+        ~statusCode=200,
+        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+        ~body=Js.Json.stringify(result.items[0] |> Entity.User.encode),
+        ()
+      );
+
+      Js.Promise.resolve(result);
+    })
+    |> Js.Promise.catch(err => {
+      Js.log(err);
+
+      let result = Result.make(
+        ~statusCode=500,
+        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+        ~body="Error!",
+        ()
+      );
+
+      Js.Promise.resolve(result);
     })
 };

@@ -43,6 +43,7 @@
     "sort": "detail",
     "title": "feature request: piyo",
     "assigned_to": [ "2", "3" ],
+    "comment": 0,
     "belongs_to": {
       "project": "abcd"
     }

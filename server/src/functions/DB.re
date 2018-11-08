@@ -129,7 +129,7 @@ module Ticket = {
     })
   };
 
-  let update = (ticketId, label, value) => {
+  let update = (ticketId, _label, value) => {
     Json.Encode.(
       object_([
         ("TableName", string("tickets")),

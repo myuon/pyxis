@@ -46,40 +46,40 @@ functions:
     handler: src/functions/echo.handler
 
   listRecentProjects:
-    handler: src/functions/project.listRecent
+    handler: src/functions/Project.bs.listRecent
     events:
       - http:
           path: /projects/recent
           method: get
   getProject:
-    handler: src/functions/project.get
+    handler: src/functions/Project.bs.get
     events:
       - http:
-          path: /projects/{id}
+          path: /projects/{projectId}
           method: get
 
   getTicket:
-    handler: src/functions/ticket.get
+    handler: src/functions/Ticket.bs.get
     events:
       - http:
           path: /tickets/{ticketId}
           method: get
 
   listPages:
-    handler: src/functions/page.get
+    handler: src/functions/Page.bs.get
     events:
       - http:
           path: /tickets/{ticketId}/pages
           method: get
 
   createComment:
-    handler: src/functions/comment.create
+    handler: src/functions/Comment.bs.create
     events:
       - http:
           path: /comments
           method: post
   listComments:
-    handler: src/functions/comment.list
+    handler: src/functions/Comment.bs.list
     events:
       - http:
           path: /tickets/{ticketId}/comments

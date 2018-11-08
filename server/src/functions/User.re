@@ -4,14 +4,8 @@ let getMe = (_event, _context) => {
   open AwsLambda.APIGatewayProxy;
 
   DB.User.query(DB.User.me)
-    |> Js.Promise.then_((result : DB.QueryResult.t(Entity.User.t)) => {
+    |> Js.Promise.then_((result : DB.QueryResult.many(Entity.User.t)) => {
       Js.log(result.items[0] |> Entity.User.encode);
-      Js.log(Result.make(
-        ~statusCode=200,
-        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Js.Json.stringify(result.items[0] |> Entity.User.encode),
-        ()
-      ));
 
       let result = Result.make(
         ~statusCode=200,

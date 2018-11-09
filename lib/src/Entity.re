@@ -109,7 +109,7 @@ module Ticket = {
       object_([
         ("id", ticket.id |> string),
         ("title", ticket.title |> string),
-        ("assinged_to", ticket.assigned_to |> array(string)),
+        ("assigned_to", ticket.assigned_to |> array(string)),
         ("comment", ticket.comment |> int),
         ("belongs_to", ticket.belongs_to |> Js.Dict.map((. value) => string(value)) |> dict),
       ])

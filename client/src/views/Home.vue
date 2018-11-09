@@ -31,12 +31,11 @@ export default {
   name: 'home',
   data () {
     return {
-      client: Client,
       recent: [],
     };
   },
   mounted: async function () {
-    this.recent = await this.client.project.list_recent();  
+    this.recent = await Client.project.listRecent();
   }
 }
 </script>

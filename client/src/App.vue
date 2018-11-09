@@ -61,18 +61,17 @@
 </template>
 
 <script>
-import { Client } from '@/client.js';
+import { Client } from '@/client';
 
 export default {
   data () {
     return {
       activeItem: 'Home',
-      client: Client,
       user: {},
     };
   },
   mounted: async function () {
-    this.user = await this.client.user.me();
+    this.user = await Client.user.me();
   },
 }
 </script>

@@ -132,7 +132,7 @@
 
 <script>
 import { Client } from '@/client';
-import VueMarkdown from 'vue-markdown'
+import VueMarkdown from 'vue-markdown';
 
 export default {
   name: 'ticket',
@@ -148,10 +148,7 @@ export default {
     },
   },
   data () {
-    const client = Client;
-
     return {
-      client: client,
       members: [
         { value: '1', label: 'わたし' },
         { value: '2', label: 'あなた' },
@@ -170,16 +167,16 @@ export default {
       this.md_mode = mode;
     },
     submitComment: async function () {
-      await this.client.comment.create(this.ticket.belongs_to.project, this.$route.params.ticketId, this.newCommentText);
+      await Client.Comment.create(this.ticket.belongs_to.project, this.$route.params.ticketId, this.newCommentText);
       this.newCommentText = '';
       await this.loadComments();
     },
     loadComments: async function () {
-      this.comments = await this.client.comment.list(this.$route.params.ticketId);
+      this.comments = await Client.comment.list(this.$route.params.ticketId);
     },
   },
   mounted: async function () {
-    this.ticket = await this.client.ticket.get(this.$route.params.ticketId);
+    this.ticket = await Client.ticket.get(this.$route.params.ticketId);
     await this.loadComments();
   },
 }

@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { Client } from '@/client';
+import { client } from '@/client.bs';
 
 export default {
   data () {
@@ -71,7 +71,7 @@ export default {
     };
   },
   mounted: async function () {
-    this.user = await Client.user.me();
+    this.user = await client.user.me();
   },
 }
 </script>

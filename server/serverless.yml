@@ -26,21 +26,6 @@ package:
     - src/**
     - node_modules/**
 
-custom:
-  dynamodb:
-    start:
-      port: 8000
-      inMemory: true
-      migrate: true
-      seed: true
-    seed:
-      development:
-        sources:
-          - table: users
-            sources: [ "./migrations/users.json" ]
-          - table: tickets
-            sources: [ "./migrations/tickets.json" ]
-
 functions:
   hello:
     handler: src/functions/echo.handler
@@ -95,29 +80,11 @@ functions:
 
 resources:
   Resources:
-    UserTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Retain
-      Properties:
-        TableName: users
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-          - AttributeName: sort
-            KeyType: RANGE
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: sort
-            AttributeType: S
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
     TicketTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
-        TableName: tickets
+        TableName: entities
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -128,6 +95,38 @@ resources:
             AttributeType: S
           - AttributeName: sort
             AttributeType: S
+          - AttributeName: owned_by
+            AttributeType: S
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: owners
+            KeySchema:
+              - AttributeName: owned_by
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: INCLUDE
+              NonKeyAttributes:
+              - title
+              - belongs_to
+              - comment
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
+custom:
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      development:
+        sources:
+          - table: entities
+            sources: [ "./migrations/entities.json" ]
+

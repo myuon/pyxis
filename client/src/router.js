@@ -15,7 +15,7 @@ export default new Router({
       component: Home,
     },
     {
-      path: '/ticket/:ticketId',
+      path: '/tickets/:ticketId',
       name: 'ticket',
       component: Ticket,
     },

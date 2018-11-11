@@ -59,7 +59,7 @@
           </template>
 
           <el-tabs v-model="currentPage">
-            <el-tab-pane :label="page.title" :key="index" :name="index.toString()" v-for="(page, index) in ticket.pages">
+            <el-tab-pane :label="page.title" :key="index" :name="index.toString()" v-for="(page, index) in pages">
               <div class="float">
                 <el-button-group class="markdown-mode">
                   <el-button @click="setMode('view')" :class="{ current: isView }" type="default" size="mini"><i class="material-icons">visibility</i></el-button>
@@ -131,7 +131,7 @@
 </template>
 
 <script>
-import { Client } from '@/client';
+import { client } from '@/client.bs';
 import VueMarkdown from 'vue-markdown';
 
 export default {
@@ -159,6 +159,7 @@ export default {
       active_tabs: [ '1', '2', '3' ],
       ticket: {},
       comments: [],
+      pages: [],
       newCommentText: '',
     }
   },
@@ -167,17 +168,18 @@ export default {
       this.md_mode = mode;
     },
     submitComment: async function () {
-      await Client.Comment.create(this.ticket.belongs_to.project, this.$route.params.ticketId, this.newCommentText);
+      await client.comment.create(this.ticket.belongs_to.project, this.$route.params.ticketId, this.newCommentText);
       this.newCommentText = '';
       await this.loadComments();
     },
     loadComments: async function () {
-      this.comments = await Client.comment.list(this.$route.params.ticketId);
+      this.comments = await client.comment.list(this.$route.params.ticketId);
     },
   },
   mounted: async function () {
-    this.ticket = await Client.ticket.get(this.$route.params.ticketId);
+    this.ticket = await client.ticket.get(this.$route.params.ticketId);
     await this.loadComments();
+    this.pages = await client.page.list(this.$route.params.ticketId);
   },
 }
 </script>

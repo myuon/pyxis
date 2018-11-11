@@ -51,6 +51,26 @@ module QueryResult = {
 };
 
 module Project = {
+  type t = Js.t({
+    .
+    id: string,
+    title: string,
+    owned_by: string,
+  });
+
+  external parse_ : Js.Json.t => t = "%identity";
+  let parse : Js.Json.t => t = json => {
+    let t = parse_(json);
+
+    [%bs.obj {
+      id: t##id |> Js.String.split("project-") |> x => x[1],
+      title: t##title,
+      owned_by: t##owned_by,
+    }]
+  };
+
+  external encode : t => Js.Json.t = "%identity";
+
   let decodeDBObject : Js.Json.t => Entity.Project.t = json => {
     Json.Decode.{
       id: json |> field("sort", string) |> Js.String.split("project-") |> x => x[1],
@@ -62,11 +82,12 @@ module Project = {
   let list = (userId) => {
     Json.Encode.(
       object_([
-        ("TableName", string("users")),
-        ("KeyConditionExpression", string("id = :id and begins_with(sort, :sort)")),
+        ("TableName", string("entities")),
+        ("IndexName", string("owners")),
+        ("KeyConditionExpression", string("owned_by = :owner and begins_with(id, :id)")),
         ("ExpressionAttributeValues", object_([
-          (":id", string(userId)),
-          (":sort", string("project")),
+          (":owner", string(userId)),
+          (":id", string("project")),
         ]))
       ])
     )
@@ -74,7 +95,7 @@ module Project = {
     |> promise
     |> Js.Promise.then_(result => {
       result
-      |> QueryResult.parseMany(decodeDBObject)
+      |> QueryResult.parseMany(parse)
       |> Js.Promise.resolve
     })
   };
@@ -110,23 +131,72 @@ module Ticket = {
     }
   };
 
+  type t = Js.t({
+    .
+    id: string,
+    title: string,
+    comment: int,
+    assigned_to: array(string),
+    belongs_to: Js.t({ .
+      project: string,
+    }),
+  });
+
+  external parse_ : Js.Json.t => t = "%identity";
+  let parse : Js.Json.t => t = json => {
+    let t = parse_(json);
+
+    [%bs.obj {
+      id: t##id |> Js.String.split("ticket-") |> x => x[1],
+      title: t##title,
+      comment: t##comment,
+      assigned_to: t##assigned_to,
+      belongs_to: {
+        project: t##belongs_to##project,
+      }
+    }]
+  };
+
+  external encode : 'a => Js.Json.t = "%identity";
+
+  let list = (userId) => {
+    {
+      "TableName": "entities",
+      "IndexName": "owners",
+      "KeyConditionExpression": "owned_by = :owned_by and begins_with(id, :id)",
+      "FilterExpression": "sort = :sort",
+      "ExpressionAttributeValues": {
+        ":owned_by": userId,
+        ":id": "ticket",
+        ":sort": "detail",
+      }
+    }
+    |> encode
+    |> query(dbc,_)
+    |> promise
+    |> Js.Promise.then_(result => {
+      result
+      |> QueryResult.parseMany(parse)
+      |> Js.Promise.resolve;
+    })
+  };
+
   let get = (ticketId) => {
-    Json.Encode.(
-      object_([
-        ("TableName", string("tickets")),
-        ("Key", object_([
-          ("id", string(ticketId)),
-          ("sort", string("detail"))
-        ]))
-      ])
-    )
+    {
+      "TableName": "entities",
+      "Key": {
+        "id": {j|ticket-$ticketId|j},
+        "sort": "detail",
+      }
+    }
+    |> encode
     |> get(dbc,_)
     |> promise
     |> Js.Promise.then_(result => {
       result
-      |> QueryResult.parseOne(decodeDBObject)
-      |> Js.Promise.resolve
-    })
+      |> QueryResult.parseOne(parse)
+      |> Js.Promise.resolve;
+    });
   };
 
   let update = (ticketId, _label, value) => {
@@ -149,6 +219,35 @@ module Ticket = {
 };
 
 module Page = {
+  type t = Js.t({
+    .
+    id: string,
+    title: string,
+    content: string,
+    belongs_to: Js.t({
+      .
+      project: string,
+      ticket: string,
+    }),
+  });
+
+  external parse_ : Js.Json.t => t = "%identity";
+  let parse : Js.Json.t => t = json => {
+    let t = parse_(json);
+
+    [%bs.obj {
+      id: t##id |> Js.String.split("ticket-") |> x => x[1],
+      title: t##title,
+      content: t##content,
+      belongs_to: {
+        project: t##belongs_to##project,
+        ticket: t##belongs_to##ticket,
+      }
+    }]
+  };
+
+  external encode : 'a => Js.Json.t = "%identity";
+
   let decodeDBObject : Js.Json.t => Entity.Page.t = json => {
     Json.Decode.{
       id: json |> field("sort", string) |> Js.String.split("-",_) |> x => x[1],
@@ -162,27 +261,59 @@ module Page = {
   };
 
   let list = (ticketId) => {
-    Json.Encode.(
-      object_([
-        ("TableName", string("tickets")),
-        ("KeyConditionExpression", string("id = :id and begins_with(sort, :sort)")),
-        ("ExpressionAttributeValues", object_([
-          (":id", string(ticketId)),
-          (":sort", string("page")),
-        ]))
-      ])
-    )
+    {
+      "TableName": "entities",
+      "KeyConditionExpression": "id = :id and begins_with(sort, :sort)",
+      "ExpressionAttributeValues": {
+        ":id": {j|ticket-$ticketId|j},
+        ":sort": "page",
+      }
+    }
+    |> encode
     |> query(dbc,_)
     |> promise
     |> Js.Promise.then_(result => {
       result
-      |> QueryResult.parseMany(decodeDBObject)
+      |> QueryResult.parseMany(parse)
       |> Js.Promise.resolve
     })
   };
 };
 
 module Comment = {
+  type t = Js.t({
+    .
+    id: string,
+    sort: string,
+    content: string,
+    created_at: Js.Date.t,
+    owned_by: string,
+    belongs_to: Js.t({
+      .
+      ticket: string,
+      project: string,
+    }),
+  });
+
+  external parse_ : Js.Json.t => t = "%identity";
+  let parse : Js.Json.t => t = json => {
+    let t = parse_(json);
+
+    [%bs.obj {
+      id: t##sort |> Js.String.split("comment-", _) |> x => x[1],
+      sort: t##sort,
+      content: t##content,
+      created_at: t##created_at,
+      owned_by: t##owned_by,
+      belongs_to: {
+        ticket: t##belongs_to##ticket,
+        project: t##belongs_to##project,
+      },
+    }]
+  };
+
+  external encode : 'a => Js.Json.t = "%identity";
+
   let decodeDBObject : Js.Json.t => Entity.Comment.t = json => {
     Json.Decode.{
       id: json |> field("sort", string) |> Js.String.split("-",_) |> x => x[1],
@@ -212,21 +343,20 @@ module Comment = {
   };
 
   let list = (ticketId) => {
-    Json.Encode.(
-      object_([
-        ("TableName", string("tickets")),
-        ("KeyConditionExpression", string("id = :id and begins_with(sort, :sort)")),
-        ("ExpressionAttributeValues", object_([
-          (":id", string(ticketId)),
-          (":sort", string("comment")),
-        ]))
-      ])
-    )
+    {
+      "TableName": "entities",
+      "KeyConditionExpression": "id = :id and begins_with(sort, :sort)",
+      "ExpressionAttributeValues": {
+        ":id": {j|ticket-$ticketId|j},
+        ":sort": "comment",
+      },
+    }
+    |> encode
     |> query(dbc,_)
     |> promise
     |> Js.Promise.then_(result => {
       result
-      |> QueryResult.parseMany(decodeDBObject)
+      |> QueryResult.parseMany(parse)
       |> Js.Promise.resolve;
     })
   };

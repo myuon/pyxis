@@ -1,3 +1,11 @@
+type t = Js.t({
+  .
+  id: string,
+  title: string,
+  content: string,
+  belongs_to: Js.Dict.t(string),
+});
+
 let get = (event, _context) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
@@ -10,11 +18,11 @@ let get = (event, _context) => {
   DB.Page.list(
     ticketId
   )
-  |> Js.Promise.then_((result : DB.QueryResult.many(Entity.Page.t)) => {
+  |> Js.Promise.then_((result : DB.QueryResult.many(DB.Page.t)) => {
     Result.make(
       ~statusCode=200,
       ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringify(Js.Json.array(result.items |> Js.Array.map(Entity.Page.encode))),
+      ~body=Js.Json.stringify(Js.Json.array(result.items |> Js.Array.map(DB.Page.encode))),
       ()
     )
     |> Js.Promise.resolve;

@@ -1,7 +1,9 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Home from './views/Home.vue'
-import Ticket from './views/Ticket.vue'
+import Vue from 'vue';
+import Router from 'vue-router';
+import Home from './views/Home.vue';
+import Ticket from './views/Ticket.vue';
+import Login from './views/Login.vue';
+import SideBar from './views/SideBar.vue';
 
 Vue.use(Router)
 
@@ -12,12 +14,25 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: Home,
+      components: {
+        default: Home,
+        sidebar: SideBar,
+      }
     },
     {
       path: '/tickets/:ticketId',
       name: 'ticket',
-      component: Ticket,
+      components: {
+        default: Ticket,
+        sidebar: SideBar,
+      },
+    },
+    {
+      path: '/login',
+      name: 'login',
+      components: {
+        default: Login,
+      },
     },
   ]
 })

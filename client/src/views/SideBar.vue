@@ -14,7 +14,7 @@
       <i class="material-icons">person_pin</i>
       <div class="user">
         Login as {{ user.name }}
-        <button class="action" type="mini">Sign out</button>
+        <button @click="signOut" class="action" type="mini">Sign out</button>
       </div>
     </div>
 
@@ -52,6 +52,9 @@
 
 <script>
 import { client } from '@/client.bs';
+import Amplify, { Auth } from 'aws-amplify';
+import aws_exports from '@/aws-exports';
+Amplify.configure(aws_exports);
 
 export default {
   name: 'side-bar',
@@ -62,6 +65,12 @@ export default {
   },
   mounted: async function () {
     this.user = await client.user.me();
+  },
+  methods: {
+    signOut: async function () {
+      await Auth.signOut();
+      this.$router.push('/signin');
+    },
   },
 }
 </script>

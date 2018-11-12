@@ -35,7 +35,7 @@ body {
 }
 
 .sidebar {
-  width: 300px;
+  max-width: 300px;
   position: fixed;
 }
 

@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Home from './views/Home.vue';
 import Ticket from './views/Ticket.vue';
-import Login from './views/Login.vue';
+import Signin from './views/Signin.vue';
 import SideBar from './views/SideBar.vue';
 
 Vue.use(Router)
@@ -28,10 +28,10 @@ export default new Router({
       },
     },
     {
-      path: '/login',
-      name: 'login',
+      path: '/signin',
+      name: 'signin',
       components: {
-        default: Login,
+        default: Signin,
       },
     },
   ]

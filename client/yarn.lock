@@ -6243,6 +6243,11 @@ vm-browserify@0.0.4:
   dependencies:
     indexof "0.0.1"
 
+vue-google-signin-button@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/vue-google-signin-button/-/vue-google-signin-button-1.0.2.tgz#71389a1233ece20c06aace0870acf54794b3af3c"
+  integrity sha1-cTiaEjPs4gwGqs4IcKz1R5Szrzw=
+
 vue-hot-reload-api@^2.3.0:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.1.tgz#b2d3d95402a811602380783ea4f566eb875569a2"

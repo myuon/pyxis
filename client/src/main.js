@@ -5,10 +5,13 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(ElementUI);
 
-import 'material-icons/iconfont/material-icons.css'
+import 'material-icons/iconfont/material-icons.css';
 
-import VueMarkdown from 'vue-markdown'
-Vue.use(VueMarkdown)
+import VueMarkdown from 'vue-markdown';
+Vue.use(VueMarkdown);
+
+import GSignInButton from 'vue-google-signin-button';
+Vue.use(GSignInButton);
 
 import App from './App.vue'
 

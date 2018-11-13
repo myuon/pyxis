@@ -16,6 +16,7 @@
     "material-icons": "^0.2.3",
     "pyxis-lib": "file:../lib",
     "vue": "^2.5.17",
+    "vue-google-signin-button": "^1.0.2",
     "vue-markdown": "^2.2.4",
     "vue-router": "^3.0.1"
   },

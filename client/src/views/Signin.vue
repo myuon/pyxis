@@ -1,5 +1,30 @@
 <template>
-  <amplify-authenticator class="center" v-bind:authConfig="authConfig" />
+  <div class="center">
+    <el-card class="box-card">
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="Sign In" name="signIn">
+          <g-signin-button
+            :params="googleSignInParams"
+            @success="onSignInSuccess"
+            @error="onSignInError">
+            <el-button type="primary">
+              Sign in with Google
+            </el-button>
+          </g-signin-button>
+        </el-tab-pane>
+        <el-tab-pane label="Sign Up" name="signUp">
+          <g-signin-button
+            :params="googleSignInParams"
+            @success="onSignInSuccess"
+            @error="onSignInError">
+            <el-button type="primary">
+              Sign up with Google
+            </el-button>
+          </g-signin-button>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
+  </div>
 </template>
 
 <script>
@@ -10,14 +35,28 @@ import Vue from 'vue';
 Amplify.configure(aws_exports);
 Vue.use(AmplifyPlugin, AmplifyModules);
 
+import token from '@/token';
+
 export default {
   name: 'login',
   components: {
   },
   data () {
     return {
+      activeTab: 'signIn',
       authConfig: {},
+      googleSignInParams: {
+        client_id: token.google.clientId,
+      },
     };
+  },
+  methods: {
+    onSignInSuccess (googleUser) {
+      console.log(googleUser.getBasicProfile().getName());
+    },
+    onSignInError (error) {
+      console.log(error);
+    },
   },
   mounted: async function () {
     AmplifyEventBus.$on('authState', (state) => {

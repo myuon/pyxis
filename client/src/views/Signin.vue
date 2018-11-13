@@ -28,13 +28,6 @@
 </template>
 
 <script>
-import Amplify, * as AmplifyModules from 'aws-amplify';
-import { AmplifyPlugin, AmplifyEventBus } from 'aws-amplify-vue';
-import aws_exports from '@/aws-exports';
-import Vue from 'vue';
-Amplify.configure(aws_exports);
-Vue.use(AmplifyPlugin, AmplifyModules);
-
 import token from '@/token';
 
 export default {
@@ -52,23 +45,12 @@ export default {
   },
   methods: {
     onSignInSuccess (googleUser) {
-      console.log(googleUser.getBasicProfile().getName());
+      console.log(googleUser.getBasicProfile().getId());
+      console.log(googleUser.getBasicProfile().getEmail());
     },
     onSignInError (error) {
       console.log(error);
     },
-  },
-  mounted: async function () {
-    AmplifyEventBus.$on('authState', (state) => {
-      if (state === 'signedIn') {
-        this.$router.push('/');
-      }
-    });
-    
-    await this.$Amplify.Auth.currentUserCredentials();
-    if (this.$Amplify.user != null) {
-      this.$router.push('/');
-    }
   },
 }
 </script>

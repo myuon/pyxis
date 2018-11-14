@@ -374,6 +374,70 @@ module Comment = {
 };
 
 module User = {
+  type t = Js.t({
+    .
+    id: string,
+    sort: string,
+    idp: Js.t({
+      .
+      google: string,
+    }),
+    created_at: Js.Date.t,
+    user_id: string,
+  });
+
+  external encode : 'a => Js.Json.t = "%identity";
+  external parse_ : Js.Json.t => t = "%identity";
+  let parse : Js.Json.t => t = json => {
+    let t = parse_(json);
+
+    [%bs.obj {
+      id: t##id |> Js.String.split("user-", _) |> x => x[1],
+      sort: t##sort,
+      idp: {
+        google: t##idp##google,
+      },
+      created_at: t##created_at,
+      user_id: t##user_id,
+    }]
+  };
+
+  let findById = userId => {
+    {
+      "TableName": "entities",
+      "Key": {
+        "id": {j|user-$userId|j},
+        "sort": "detail",
+      }
+    }
+    |> encode
+    |> get(dbc,_)
+    |> promise
+    |> Js.Promise.then_(result => {
+      result
+      |> QueryResult.parseOne(parse)
+      |> Js.Promise.resolve;
+    });
+  };
+
+  let findViaIdp = (idp, idp_id) => {
+    {
+      "TableName": "entities",
+      "Key": {
+        "id": {j|idp-$idp-$idp_id|j},
+        "sort": "detail",
+      },
+    }
+    |> encode
+    |> get(dbc,_)
+    |> promise
+    |> Js.Promise.then_(result => {
+      result
+      |> QueryResult.parseOne(parse)
+      |> Js.Promise.resolve;
+    });
+  };
+
   let me = "1";
 
   let query = (userId) => {

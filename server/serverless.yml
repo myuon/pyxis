@@ -27,6 +27,13 @@ package:
     - node_modules/**
 
 functions:
+  signUp:
+    handler: src/functions/auth/Auth.bs.signUp
+    events:
+      - http:
+          path: /auth/signUp
+          method: post
+
   hello:
     handler: src/functions/echo.handler
 
@@ -80,7 +87,7 @@ functions:
 
 resources:
   Resources:
-    TicketTable:
+    EntityTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
@@ -116,6 +123,20 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
+    UserIDTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: userId
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 custom:
   dynamodb:
@@ -129,4 +150,6 @@ custom:
         sources:
           - table: entities
             sources: [ "./migrations/entities.json" ]
+          - table: userId
+            sources: [ "./migrations/users.json" ]
 

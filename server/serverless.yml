@@ -27,6 +27,9 @@ package:
     - node_modules/**
 
 functions:
+  authorizer:
+    handler: src/functions/auth/Auth.bs.authorize
+
   signIn:
     handler: src/functions/auth/Auth.bs.signIn
     events:
@@ -90,6 +93,7 @@ functions:
           path: /users/me
           method: get
           cors: true
+          authorizer: authorizer
 
 resources:
   Resources:

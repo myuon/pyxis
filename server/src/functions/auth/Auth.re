@@ -1,3 +1,64 @@
+[@bs.module "jsonwebtoken"] external jwtVerify : (string, string) => 'a = "verify";
+
+/* Is there a way to catch undefined authorizationContext as it is with type-safety? */
+let authorize : (Js.Dict.t(Js.Json.t), 'a, 'c) => Js.Promise.t(unit) = (event, context, callback) => {
+  let buildPolicyDoc = (userId, effect, resource, context) => {
+    let policy = {
+      "principalId": userId,
+      "policyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [|
+          {
+            "Action": "execute-api:Invoke",
+            "Effect": effect,
+            "Resource": resource,
+          }
+        |]
+      },
+      "context": context,
+    };
+  };
+
+  let verify = (token, methodArn) => {
+    let decoded : {
+      .
+      "user" : {
+        .
+        "userId": string,
+      },
+    } = jwtVerify(token, Node.Process.process##env |> Js.Dict.unsafeGet(_, "jwt_secret"));
+
+    /* skip user scope check now */
+    let isAllowed = true;
+
+    let effect = if (isAllowed) { "Allow" } else { "Deny" };
+    let userId = decoded##user##userId;
+    let authorizerContext = {
+      "user": {
+        "userId": userId,
+      },
+    };
+    buildPolicyDoc(userId, effect, methodArn, authorizerContext);
+  };
+
+  let token = event
+    |> Js.Dict.get(_, "authorizationToken")
+    |> Js.Option.andThen((. v) => Js.Json.decodeString(v));
+  let methodArn = event
+    |> Js.Dict.get(_, "methodArn")
+    |> Js.Option.andThen((. v) => Js.Json.decodeString(v));
+  Js.log(event);
+  Js.log(token |> Js.Option.isNone);
+
+  let doc = verify(
+    token |> Js.Option.getExn,
+    methodArn |> Js.Option.getExn,
+  );
+
+  callback(Js.Json.null, doc);
+  Js.Promise.resolve();
+};
+
 let clientID = "568268689599-r3s51pdntp56iu6l1amus3eq29johlh3.apps.googleusercontent.com";
 
 type gClient;

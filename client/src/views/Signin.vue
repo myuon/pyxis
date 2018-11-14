@@ -15,8 +15,8 @@
         <el-tab-pane label="Sign Up" name="signUp">
           <g-signin-button
             :params="googleSignInParams"
-            @success="onSignInSuccess"
-            @error="onSignInError">
+            @success="onSignUpSuccess"
+            @error="onSignUpError">
             <el-button type="primary">
               Sign up with Google
             </el-button>
@@ -29,6 +29,7 @@
 
 <script>
 import token from '@/token';
+import { client } from '@/client.bs';
 
 export default {
   name: 'login',
@@ -44,9 +45,26 @@ export default {
     };
   },
   methods: {
+    onSignUpSuccess (googleUser) {
+      client.auth.signIn({
+        userName: 'myuon',
+        email: 'ioi.joi.koi.loi@gmail.com',
+        idp: 'Google',
+        token: googleUser.getAuthResponse().id_token,
+      });
+    },
+    onSignUpError (error) {
+      console.log(error);
+    },
     onSignInSuccess (googleUser) {
       console.log(googleUser.getBasicProfile().getId());
       console.log(googleUser.getBasicProfile().getEmail());
+      client.auth.signIn({
+        userName: '',
+        email: '',
+        idp: 'Google',
+        token: googleUser.getAuthResponse().id_token,
+      });
     },
     onSignInError (error) {
       console.log(error);

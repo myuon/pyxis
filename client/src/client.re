@@ -8,8 +8,25 @@ let fetch = (api) => {
   |> Js.Promise.then_(result => result |> parse |> Js.Promise.resolve);
 };
 
+let post = (api, body) => {
+  Fetch.fetchWithInit(
+    {j|$endpoint$api|j},
+    Fetch.RequestInit.make(
+      ~method_=Post,
+      ~body=Fetch.BodyInit.make(Js.Json.stringify(body)),
+      ()
+    )
+  )
+  |> Js.Promise.then_(Fetch.Response.text)
+  |> Js.Promise.then_(result => result |> parse |> Js.Promise.resolve);
+};
+
 let client : {
   .
+  "auth": {
+    .
+    "signIn": Js.Json.t => Js.Promise.t(bool),
+  },
   "user": {
     .
     "me": unit => Js.Promise.t({
@@ -69,14 +86,14 @@ let client : {
     })),
   },
 } = {
+  "auth": {
+    "signIn": (json) => post("/auth/signIn", json)
+  },
   "user": {
     "me": () => fetch("/users/me"),
   },
   "ticket": {
-    "get": (ticketId) => {
-      let ticket = fetch({j|/tickets/$ticketId|j});
-      ticket;
-    },
+    "get": (ticketId) => fetch({j|/tickets/$ticketId|j}),
   },
   "comment": {
     "list": (ticketId) => fetch({j|/tickets/$ticketId/comments|j}),

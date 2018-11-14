@@ -27,6 +27,12 @@ package:
     - node_modules/**
 
 functions:
+  signIn:
+    handler: src/functions/auth/Auth.bs.signIn
+    events:
+      - http:
+          path: /auth/signIn
+          method: post
   signUp:
     handler: src/functions/auth/Auth.bs.signUp
     events:
@@ -129,10 +135,10 @@ resources:
       Properties:
         TableName: userId
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: user_name
             KeyType: HASH
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: user_name
             AttributeType: S
         ProvisionedThroughput:
           ReadCapacityUnits: 1

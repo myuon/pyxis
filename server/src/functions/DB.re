@@ -383,7 +383,7 @@ module User = {
       google: string,
     }),
     created_at: Js.Date.t,
-    user_id: string,
+    user_name: string,
   });
 
   external encode : 'a => Js.Json.t = "%identity";
@@ -398,7 +398,7 @@ module User = {
         google: t##idp##google,
       },
       created_at: t##created_at,
-      user_id: t##user_id,
+      user_name: t##user_name,
     }]
   };
 
@@ -436,6 +436,55 @@ module User = {
       |> QueryResult.parseOne(parse)
       |> Js.Promise.resolve;
     });
+  };
+
+  let createIdp = (idp, idpId, userId) => {
+    {
+      "TableName": "entities",
+      "Item": {
+        "id": {j|idp-$idp-$idpId|j},
+        "sort": "detail",
+        "owned_by": userId
+      }
+    }
+    |> encode
+    |> put(dbc,_)
+    |> promise;
+  };
+
+  let create = (idp, userName) => {
+    let userId = UUID.uuid();
+
+    {
+      "TableName": "entities",
+      "Item": {
+        "id": {j|user-$userId|j},
+        "sort": "detail",
+        "idp": idp,
+        "created_at": Js.Date.make() |> Js.Date.toISOString,
+        "user_name": userName,
+      }
+    }
+    |> encode
+    |> put(dbc,_)
+    |> promise
+    |> Js.Promise.then_(result => {
+      userId
+      |> Js.Promise.resolve;
+    });
+  };
+
+  let createUsername = (userId, userName) => {
+    {
+      "TableName": "users",
+      "Item": {
+        "user_name": userName,
+        "id": userId,
+      }
+    }
+    |> encode
+    |> put(dbc,_)
+    |> promise;
   };
 
   let me = "1";

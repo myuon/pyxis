@@ -373,6 +373,27 @@ module Comment = {
   };
 };
 
+module Idp = {
+  type t = Js.t({
+    .
+    id: string,
+    idp: string,
+    owned_by: string,
+  });
+
+  external parse_ : Js.Json.t => 'a = "%identity";
+  let parse : Js.Json.t => t = json => {
+    let t = parse_(json);
+    let [| _, idp, idpId |] = t##id |> Js.String.split("-");
+
+    [%bs.obj {
+      id: idpId,
+      idp: idp,
+      owned_by: t##owned_by,
+    }]
+  };
+};
+
 module User = {
   type t = Js.t({
     .
@@ -387,7 +408,7 @@ module User = {
   });
 
   external encode : 'a => Js.Json.t = "%identity";
-  external parse_ : Js.Json.t => t = "%identity";
+  external parse_ : Js.Json.t => 'a = "%identity";
   let parse : Js.Json.t => t = json => {
     let t = parse_(json);
 
@@ -433,7 +454,7 @@ module User = {
     |> promise
     |> Js.Promise.then_(result => {
       result
-      |> QueryResult.parseOne(parse)
+      |> QueryResult.parseOne(Idp.parse)
       |> Js.Promise.resolve;
     });
   };

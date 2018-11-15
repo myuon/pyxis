@@ -12,9 +12,19 @@ SignIn flow:
 1. Verify token and verify userId in DB
 1. Create jwt
 
-## jwt
+## JWT
 
 JWT (Json Web Token) is used for authentication and authorization.
+
+### Key generation
+
+```sh
+$ cd token && ssh-keygen -t rsa -b 4096 -f jwtRS256.key
+```
+
+This will generate `jwtRS256.key` and `jwtRS256.key.pub`.
+
+### Schema
 
 Payload:
 

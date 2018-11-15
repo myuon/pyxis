@@ -3,7 +3,14 @@ let endpoint = "http://localhost:3000";
 [@bs.scope "JSON"] [@bs.val] external parse : string => 'a = "parse";
 
 let fetch = (api) => {
-  Fetch.fetch({j|$endpoint$api|j})
+  Fetch.fetchWithInit(
+    {j|$endpoint$api|j},
+    Fetch.RequestInit.make(
+      ~method_=Get,
+      ~credentials=Include,
+      ()
+    )
+  )
   |> Js.Promise.then_(Fetch.Response.text)
   |> Js.Promise.then_(result => result |> parse |> Js.Promise.resolve);
 };
@@ -14,18 +21,19 @@ let post = (api, body) => {
     Fetch.RequestInit.make(
       ~method_=Post,
       ~body=Fetch.BodyInit.make(Js.Json.stringify(body)),
+      ~credentials=Include,
       ()
     )
   )
   |> Js.Promise.then_(Fetch.Response.text)
-  |> Js.Promise.then_(result => result |> parse |> Js.Promise.resolve);
+  |> Js.Promise.then_(result => result |> Js.Json.parseExn |> Js.Promise.resolve);
 };
 
 let client : {
   .
   "auth": {
     .
-    "signIn": Js.Json.t => Js.Promise.t(bool),
+    "signIn": Js.Json.t => Js.Promise.t(Js.Json.t),
   },
   "user": {
     .

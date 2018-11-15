@@ -49,22 +49,21 @@ export default {
       client.auth.signIn({
         userName: 'myuon',
         email: 'ioi.joi.koi.loi@gmail.com',
-        idp: 'Google',
+        idp: 'google',
         token: googleUser.getAuthResponse().id_token,
       });
     },
     onSignUpError (error) {
       console.log(error);
     },
-    onSignInSuccess (googleUser) {
-      console.log(googleUser.getBasicProfile().getId());
-      console.log(googleUser.getBasicProfile().getEmail());
-      client.auth.signIn({
-        userName: '',
-        email: '',
-        idp: 'Google',
+    onSignInSuccess: async function (googleUser) {
+      console.log({
         token: googleUser.getAuthResponse().id_token,
       });
+      const result = await client.auth.signIn({
+        token: googleUser.getAuthResponse().id_token,
+      });
+      console.log(result);
     },
     onSignInError (error) {
       console.log(error);

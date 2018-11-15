@@ -18,6 +18,9 @@ provider:
         - xray:PutTraceSegments
         - xray:PutTelemetryRecords
       Resource: "*"
+  environment:
+    jwt_public: ${file(../token/jwtRS256.key.pub)}
+    jwt_private: ${file(../token/jwtRS256.key)}
 
 package:
   exclude:

@@ -6,6 +6,8 @@ FLG -nostdlib -color always
 FLG -w -30-40+6+7+27+32..39+44+45+101
 S /home/ioijoi/workspace/pyxis/client/node_modules/bs-fetch/lib/ocaml
 B /home/ioijoi/workspace/pyxis/client/node_modules/bs-fetch/lib/ocaml
+S /home/ioijoi/workspace/pyxis/client/node_modules/@justgage/reason-cookie/lib/ocaml
+B /home/ioijoi/workspace/pyxis/client/node_modules/@justgage/reason-cookie/lib/ocaml
 S src
 B lib/bs/src
 ####BSB GENERATED: NO EDIT}

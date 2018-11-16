@@ -16,6 +16,13 @@
     cssnano-preset-default "^4.0.0"
     postcss "^7.0.0"
 
+"@justgage/reason-cookie@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@justgage/reason-cookie/-/reason-cookie-0.1.2.tgz#8b93650fa47db0d1b98d789da7a6cc3c6bea1a9b"
+  integrity sha512-8F1wPUNqSCuMRhlrAqAJQ8sXAvf2yJwLhJkclnwWYNVcjZoBomGFb786Vna3TvHUrfhRZteDcAFJp2Vo+Ani3A==
+  dependencies:
+    js-cookie "^2.2.0"
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -3177,6 +3184,11 @@ joi@^13.0.0:
     hoek "5.x.x"
     isemail "3.x.x"
     topo "3.x.x"
+
+js-cookie@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/js-cookie/-/js-cookie-2.2.0.tgz#1b2c279a6eece380a12168b92485265b35b1effb"
+  integrity sha1-Gywnmm7s44ChIWi5JIUmWzWx7/s=
 
 js-message@1.0.5:
   version "1.0.5"

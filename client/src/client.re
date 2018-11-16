@@ -95,7 +95,17 @@ let client : {
   },
 } = {
   "auth": {
-    "signIn": (json) => post("/auth/signIn", json |> encode)
+    "signIn": (json) => {
+      open JustgageReasonCookie;
+
+      post("/auth/signIn", json |> encode)
+      |> Js.Promise.then_(result => {
+        Cookie.setString("token", result##token);
+
+        result
+        |> Js.Promise.resolve;
+      })
+    }
   },
   "user": {
     "me": () => fetch("/users/me"),

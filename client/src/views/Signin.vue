@@ -57,13 +57,10 @@ export default {
       console.log(error);
     },
     onSignInSuccess: async function (googleUser) {
-      console.log({
+      await client.auth.signIn({
         token: googleUser.getAuthResponse().id_token,
       });
-      const result = await client.auth.signIn({
-        token: googleUser.getAuthResponse().id_token,
-      });
-      console.log(result.token);
+      this.$router.push('/');
     },
     onSignInError (error) {
       console.log(error);

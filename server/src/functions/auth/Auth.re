@@ -3,7 +3,7 @@
 external encode : 'a => Js.Json.t = "%identity";
 external decode : Js.Json.t => 'a = "%identity";
 
-exception Return(Js.Json.t, string);
+exception Return(Js.Json.t, Js.Json.t);
 
 /* jwt payload */
 type payload = Js.t({
@@ -17,7 +17,7 @@ type payload = Js.t({
 });
 
 /* Is there a way to catch undefined authorizationContext as it is with type-safety? */
-let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.Promise.t(unit) = (event, _context, callback) => {
+let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, Js.Json.t) => unit) => Js.Promise.t(unit) = (event, _context, callback) => {
   let generatePolicy = (principalId, effect, resource, context) => {
     {
       "principalId": principalId,
@@ -50,7 +50,6 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.
       | None => raise(Return(
         "Unauthorized" |> Js.Json.string,
         generatePolicy("user", "Deny", methodArn, Js.null)
-        |> Js.Json.stringify
       ))
     };
 
@@ -75,8 +74,8 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.
 
     raise(Return(
       Js.Json.null,
-      generatePolicy(userId, effect, methodArn, authorizerContext) |> Js.Json.stringify)
-    );
+      generatePolicy(userId, effect, methodArn, authorizerContext)
+    ));
   };
 
   try (run()) {

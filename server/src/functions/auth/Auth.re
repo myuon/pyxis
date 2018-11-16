@@ -1,5 +1,5 @@
-[@bs.module "jsonwebtoken"] external jwtVerify : (string, string) => 'a = "verify";
-[@bs.module "jsonwebtoken"] external jwtSign : (Js.Json.t, string, Js.Json.t, (Js.null(exn), string) => unit) => unit = "sign";
+[@bs.module "jsonwebtoken"] external jwtVerify : (string, string, Js.Json.t) => 'a = "verify";
+[@bs.module "jsonwebtoken"] external jwtSign : (Js.Json.t, string, Js.Json.t) => string = "sign";
 external encode : 'a => Js.Json.t = "%identity";
 external decode : Js.Json.t => 'a = "%identity";
 
@@ -15,18 +15,6 @@ type payload = Js.t({
     google: string,
   }),
 });
-
-let sign : (payload, string, Js.Json.t) => Js.Promise.t(string) = (payload, secret, option) => {
-  Js.Promise.make((~resolve, ~reject) => {
-    jwtSign(payload |> encode, secret, option, (err, token) => {
-      if (err != Js.null) {
-        reject(. err |> Js.Null.getExn);
-      } else {
-        resolve(. token);
-      }
-    });
-  });
-}
 
 /* Is there a way to catch undefined authorizationContext as it is with type-safety? */
 let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.Promise.t(unit) = (event, _context, callback) => {
@@ -47,26 +35,11 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.
     } |> encode;
   };
 
-  let verify = (token, methodArn) => {
-    let decoded : payload = jwtVerify(token, Node.Process.process##env |> Js.Dict.unsafeGet(_, "jwt_public"));
-
-    /* skip user scope check now */
-    let isAllowed = true;
-
-    let effect = if (isAllowed) { "Allow" } else { "Deny" };
-    let userId = decoded##user_id;
-    let authorizerContext = [%bs.obj {
-      user: {
-        userId: userId,
-      },
-    }];
-    buildPolicyDoc(userId, effect, methodArn, authorizerContext);
-  };
-
   let run = () => {
     let token = event
       |> Js.Dict.get(_, "authorizationToken")
-      |> Js.Option.andThen((. v) => Js.Json.decodeString(v));
+      |> Js.Option.andThen((. v) => Js.Json.decodeString(v))
+      |> Js.Option.map((. v) => v |> Js.String.split("Bearer ") |> x => x[1]);
     let methodArn = event
       |> Js.Dict.get(_, "methodArn")
       |> Js.Option.andThen((. v) => Js.Json.decodeString(v));
@@ -80,12 +53,27 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.
       ))
     };
 
-    let doc = verify(
+    let decoded : payload = jwtVerify(
       token,
-      methodArn |> Js.Option.getExn,
+      Node.Process.process##env |> Js.Dict.unsafeGet(_, "jwt_public"),
+      {
+        "algorithms": [| "RS256" |]
+      } |> encode
     );
+    Js.log(decoded);
 
-    raise(Return(Js.Json.null, doc |> Js.Json.stringify));
+    /* skip user scope check now */
+    let isAllowed = true;
+
+    let effect = if (isAllowed) { "Allow" } else { "Deny" };
+    let userId = decoded##user_id;
+    let authorizerContext = [%bs.obj {
+      user: {
+        userId: userId,
+      },
+    }];
+
+    raise(Return(Js.Json.null, buildPolicyDoc(userId, effect, methodArn |> Js.Option.getExn, authorizerContext) |> Js.Json.stringify));
   };
 
   try (run()) {
@@ -181,39 +169,35 @@ let signIn = (event, _context) => {
     |> Js.Promise.then_((result : DB.QueryResult.one(DB.Idp.t)) => {
       DB.User.findById(result.item##owned_by)
       |> Js.Promise.then_((result : DB.QueryResult.one(DB.User.t)) => {
-        let token = sign(
+        let token = jwtSign(
           [%bs.obj {
             user_id: result.item##id,
             user_name: result.item##user_name,
             idp: {
               google: idpId,
             }
-          }],
+          }] |> encode,
           Node.Process.process##env |> Js.Dict.unsafeGet(_, "jwt_private"),
           [%bs.obj {
             algorithm: "RS256",
           }] |> encode
         );
 
-        token
-        |> Js.Promise.then_(token => {
-          Result.make(
-            ~statusCode=200,
-            ~headers=Js.Dict.fromArray([|
-              ("Access-Control-Allow-Origin", Js.Json.string("*")),
-              ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
-              /*
-              Currently we do not use Set-Cookie header since it does not work in offline http environment
-              ("Set-Cookie", Js.Json.string({j|token=$token; Max-Age=7200;|j}))
-              */
-            |]),
-            ~body={
-              "token": token
-            } |> encode |> Js.Json.stringify,
-            ()
-          )
-          |> Js.Promise.resolve;
-        })
+        Result.make(
+          ~statusCode=200,
+          ~headers=Js.Dict.fromArray([|
+            ("Access-Control-Allow-Origin", Js.Json.string("*")),
+            ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
+            /*
+            Currently we do not use Set-Cookie header since it does not work in offline http environment
+            ("Set-Cookie", Js.Json.string({j|token=$token; Max-Age=7200;|j}))
+            */
+          |]),
+          ~body={
+            "token": token
+          } |> encode |> Js.Json.stringify,
+          ()
+        )
         |> Js.Promise.resolve;
       })
       |> Js.Promise.resolve;

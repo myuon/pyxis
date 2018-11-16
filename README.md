@@ -19,7 +19,9 @@ JWT (Json Web Token) is used for authentication and authorization.
 ### Key generation
 
 ```sh
-$ cd token && ssh-keygen -t rsa -b 4096 -f jwtRS256.key
+$ cd token
+$ ssh-keygen -t rsa -b 4096 -f jwtRS256.key
+$ openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
 ```
 
 This will generate `jwtRS256.key` and `jwtRS256.key.pub`.

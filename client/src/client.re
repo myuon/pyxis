@@ -2,11 +2,15 @@ let endpoint = "http://localhost:3000";
 external decode : Js.Json.t => 'a = "%identity";
 external encode : 'a => Js.Json.t = "%identity";
 
-let fetch = (api) => {
+let get = (api) => {
+  open JustgageReasonCookie;
+  let token = Cookie.getAsString("token");
+
   Fetch.fetchWithInit(
     {j|$endpoint$api|j},
     Fetch.RequestInit.make(
       ~method_=Get,
+      ~headers=Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}}),
       ~credentials=Include,
       ()
     )
@@ -16,11 +20,15 @@ let fetch = (api) => {
 };
 
 let post = (api, body) => {
+  open JustgageReasonCookie;
+  let token = Cookie.getAsString("token");
+
   Fetch.fetchWithInit(
     {j|$endpoint$api|j},
     Fetch.RequestInit.make(
       ~method_=Post,
       ~body=Fetch.BodyInit.make(Js.Json.stringify(body)),
+      ~headers=Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}}),
       ~credentials=Include,
       ()
     )
@@ -108,18 +116,23 @@ let client : {
     }
   },
   "user": {
-    "me": () => fetch("/users/me"),
+    "me": () => get("/users/me")
+      |> Js.Promise.catch(err => {
+        Js.log(err);
+
+        Js.Promise.resolve({ "id": "" });
+      }),
   },
   "ticket": {
-    "get": (ticketId) => fetch({j|/tickets/$ticketId|j}),
+    "get": (ticketId) => get({j|/tickets/$ticketId|j}),
   },
   "comment": {
-    "list": (ticketId) => fetch({j|/tickets/$ticketId/comments|j}),
+    "list": (ticketId) => get({j|/tickets/$ticketId/comments|j}),
   },
   "page": {
-    "list": (ticketId) => fetch({j|/tickets/$ticketId/pages|j}),
+    "list": (ticketId) => get({j|/tickets/$ticketId/pages|j}),
   },
   "project": {
-    "listRecent": () => fetch("/projects/recent"),
+    "listRecent": () => get("/projects/recent"),
   },
 };

@@ -202,9 +202,14 @@ let signIn = (event, _context) => {
             ~headers=Js.Dict.fromArray([|
               ("Access-Control-Allow-Origin", Js.Json.string("*")),
               ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
+              /*
+              Currently we do not use Set-Cookie header since it does not work in offline http environment
               ("Set-Cookie", Js.Json.string({j|token=$token; Max-Age=7200;|j}))
+              */
             |]),
-            ~body=Js.Json.null |> Js.Json.stringify,
+            ~body={
+              "token": token
+            } |> encode |> Js.Json.stringify,
             ()
           )
           |> Js.Promise.resolve;

@@ -63,7 +63,7 @@ export default {
       const result = await client.auth.signIn({
         token: googleUser.getAuthResponse().id_token,
       });
-      console.log(result);
+      console.log(result.token);
     },
     onSignInError (error) {
       console.log(error);

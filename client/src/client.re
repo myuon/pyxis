@@ -1,7 +1,5 @@
 let endpoint = "http://localhost:3000";
 
-[@bs.scope "JSON"] [@bs.val] external parse : string => 'a = "parse";
-
 let fetch = (api) => {
   Fetch.fetchWithInit(
     {j|$endpoint$api|j},
@@ -12,7 +10,7 @@ let fetch = (api) => {
     )
   )
   |> Js.Promise.then_(Fetch.Response.text)
-  |> Js.Promise.then_(result => result |> parse |> Js.Promise.resolve);
+  |> Js.Promise.then_(result => result |> Js.Json.parseExn |> Js.Promise.resolve);
 };
 
 let post = (api, body) => {

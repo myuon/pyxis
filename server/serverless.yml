@@ -39,6 +39,7 @@ functions:
       - http:
           path: /auth/signIn
           method: post
+
   signUp:
     handler: src/functions/auth/Auth.bs.signUp
     events:
@@ -55,12 +56,15 @@ functions:
       - http:
           path: /projects/recent
           method: get
+          authorizer: authorizer
+
   getProject:
     handler: src/functions/Project.bs.get
     events:
       - http:
           path: /projects/{projectId}
           method: get
+          authorizer: authorizer
 
   getTicket:
     handler: src/functions/Ticket.bs.get
@@ -68,6 +72,7 @@ functions:
       - http:
           path: /tickets/{ticketId}
           method: get
+          authorizer: authorizer
 
   listPages:
     handler: src/functions/Page.bs.get
@@ -75,6 +80,7 @@ functions:
       - http:
           path: /tickets/{ticketId}/pages
           method: get
+          authorizer: authorizer
 
   createComment:
     handler: src/functions/Comment.bs.create
@@ -82,12 +88,15 @@ functions:
       - http:
           path: /comments
           method: post
+          authorizer: authorizer
+
   listComments:
     handler: src/functions/Comment.bs.list
     events:
       - http:
           path: /tickets/{ticketId}/comments
           method: get
+          authorizer: authorizer
 
   getMe:
     handler: src/functions/User.bs.getMe

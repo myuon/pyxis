@@ -1,4 +1,6 @@
 let endpoint = "http://localhost:3000";
+external decode : Js.Json.t => 'a = "%identity";
+external encode : 'a => Js.Json.t = "%identity";
 
 let fetch = (api) => {
   Fetch.fetchWithInit(
@@ -10,7 +12,7 @@ let fetch = (api) => {
     )
   )
   |> Js.Promise.then_(Fetch.Response.text)
-  |> Js.Promise.then_(result => result |> Js.Json.parseExn |> Js.Promise.resolve);
+  |> Js.Promise.then_(result => result |> Js.Json.parseExn |> decode |> Js.Promise.resolve);
 };
 
 let post = (api, body) => {
@@ -24,14 +26,14 @@ let post = (api, body) => {
     )
   )
   |> Js.Promise.then_(Fetch.Response.text)
-  |> Js.Promise.then_(result => result |> Js.Json.parseExn |> Js.Promise.resolve);
+  |> Js.Promise.then_(result => result |> Js.Json.parseExn |> decode |> Js.Promise.resolve);
 };
 
 let client : {
   .
   "auth": {
     .
-    "signIn": Js.Json.t => Js.Promise.t(Js.Json.t),
+    "signIn": {. "token": string} => Js.Promise.t({. "token": string }),
   },
   "user": {
     .
@@ -93,7 +95,7 @@ let client : {
   },
 } = {
   "auth": {
-    "signIn": (json) => post("/auth/signIn", json)
+    "signIn": (json) => post("/auth/signIn", json |> encode)
   },
   "user": {
     "me": () => fetch("/users/me"),

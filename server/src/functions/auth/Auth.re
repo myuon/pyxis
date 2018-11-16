@@ -18,7 +18,7 @@ type payload = Js.t({
 
 /* Is there a way to catch undefined authorizationContext as it is with type-safety? */
 let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.Promise.t(unit) = (event, _context, callback) => {
-  let buildPolicyDoc = (principalId, effect, resource, context) => {
+  let generatePolicy = (principalId, effect, resource, context) => {
     {
       "principalId": principalId,
       "policyDocument": {
@@ -42,13 +42,14 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.
       |> Js.Option.map((. v) => v |> Js.String.split("Bearer ") |> x => x[1]);
     let methodArn = event
       |> Js.Dict.get(_, "methodArn")
-      |> Js.Option.andThen((. v) => Js.Json.decodeString(v));
+      |> Js.Option.andThen((. v) => Js.Json.decodeString(v))
+      |> Js.Option.getExn;
 
     let token = switch token {
       | Some(token) => token
       | None => raise(Return(
         "Unauthorized" |> Js.Json.string,
-        buildPolicyDoc("user", "Deny", methodArn |> Js.Option.getExn, Js.null)
+        generatePolicy("user", "Deny", methodArn, Js.null)
         |> Js.Json.stringify
       ))
     };
@@ -60,7 +61,6 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.
         "algorithms": [| "RS256" |]
       } |> encode
     );
-    Js.log(decoded);
 
     /* skip user scope check now */
     let isAllowed = true;
@@ -73,7 +73,10 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, string) => unit) => Js.
       },
     }];
 
-    raise(Return(Js.Json.null, buildPolicyDoc(userId, effect, methodArn |> Js.Option.getExn, authorizerContext) |> Js.Json.stringify));
+    raise(Return(
+      Js.Json.null,
+      generatePolicy(userId, effect, methodArn, authorizerContext) |> Js.Json.stringify)
+    );
   };
 
   try (run()) {
@@ -137,7 +140,7 @@ let signUp = (event, _context) => {
         DB.User.createIdp("google", idpId, userId),
         DB.User.createUsername(userId, body##user_name),
       |])
-      |> Js.Promise.then_(result => {
+      |> Js.Promise.then_(_ => {
         Result.make(
           ~statusCode=200,
           ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),

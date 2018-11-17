@@ -412,7 +412,7 @@ module Comment = {
     id: string,
     sort: string,
     content: string,
-    created_at: Js.Date.t,
+    created_at: string,
     owned_by: string,
     belongs_to: Js.t({
       .
@@ -497,14 +497,16 @@ module Comment = {
     },
     "owned_by": string,
   }) => Js.Promise.t(Js.Json.t) = (commentId, item) => {
+    let ticketId = item##belongs_to##ticket;
+
     {
       "TableName": "entities",
       "Item": [%bs.obj {
-        id: item##belongs_to##ticket,
+        id: {j|ticket-$ticketId|j},
         sort: {j|comment-$commentId|j},
         content: item##content,
         belongs_to: item##belongs_to,
-        created_at: Js.Date.make(),
+        created_at: Js.Date.make() |> Js.Date.toISOString,
         owned_by: item##owned_by,
       }]
       |> (encode : t => Js.Json.t)

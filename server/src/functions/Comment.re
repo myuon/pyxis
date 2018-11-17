@@ -54,7 +54,7 @@ type t = Js.t({
   .
   id: string,
   content: string,
-  created_at: Js.Date.t,
+  created_at: string,
   owned_by: string,
   belongs_to: Js.t({
     .

@@ -83,7 +83,7 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, Js.Json.t) => unit) => 
   }
 };
 
-let clientID = "568268689599-r3s51pdntp56iu6l1amus3eq29johlh3.apps.googleusercontent.com";
+let clientID : string = Node.Process.process##env |> Js.Dict.unsafeGet(_, "google_clientid");
 
 type gClient;
 let gclient : gClient = [%raw {|

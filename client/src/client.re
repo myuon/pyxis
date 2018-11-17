@@ -104,7 +104,17 @@ let client : {
         .
         "project": string,
       },
-    }))
+    })),
+    "create": {
+      .
+      "content": string,
+      "belongs_to": {
+        .
+        "project": string,
+        "ticket": string,
+      },
+      "owned_by": string,
+    } => Js.Promise.t(Js.Json.t),
   },
   "page": {
     .
@@ -159,6 +169,7 @@ let client : {
   },
   "comment": {
     "list": (ticketId) => get({j|/tickets/$ticketId/comments|j}),
+    "create": (json) => post("/comments/", json |> encode),
   },
   "page": {
     "list": (ticketId) => get({j|/tickets/$ticketId/pages|j}),

@@ -170,7 +170,14 @@ export default {
       this.md_mode = mode;
     },
     submitComment: async function () {
-      await client.comment.create(this.ticket.belongs_to.project, this.$route.params.ticketId, this.newCommentText);
+      await client.comment.create({
+        content: this.newCommentText,
+        belongs_to: {
+          project: this.ticket.belongs_to,
+          ticket: this.$route.params.ticketId,
+        },
+        owned_by: "1",
+      });
       this.newCommentText = '';
       await this.loadComments();
     },

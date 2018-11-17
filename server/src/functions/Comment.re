@@ -1,44 +1,47 @@
+external decode : Js.Json.t => 'a = "%identity";
+
 let create = (event, _context) => {
   open AwsLambda.APIGatewayProxy;
 
-  let comment = event
+  let input : {
+    .
+    "content": string,
+    "belongs_to": {
+      .
+      "project": string,
+      "ticket": string,
+    },
+    "owned_by": string,
+  } = event
     |> Event.bodyGet
     |> Js.Option.getExn
     |> Js.Json.parseExn
-    |> Entity.Comment.decode;
+    |> decode;
   
-  DB.Ticket.get(
-    comment.belongs_to |> Js.Dict.get(_, "ticket") |> Js.Option.getExn
-  )
+  DB.Ticket.get(input##belongs_to##ticket)
   |> Js.Promise.then_((result : DB.QueryResult.one(DB.Ticket.t)) => {
     let item = result.item;
-    let ticketInfo = [%bs.obj {
-      id: item##id,
-      title: item##title,
-      comment: item##comment + 1,
-      belongs_to: {
-        project: item##belongs_to##project
-      }
-    }];
-    let comment : Entity.Comment.t = {...comment, id: ticketInfo##comment |> string_of_int};
-
+    let commentIndex = item##comment + 1;
+    
+    /* This process is not safe -- do rollback if needed */
     Js.Promise.all2(
       (
         DB.Comment.create(
-          comment
+          commentIndex |> string_of_int,
+          input
         ),
         DB.Ticket.update(
-          comment.belongs_to |> Js.Dict.get(_, "ticket") |> Belt.Option.getExn,
+          input##belongs_to##ticket,
           "comment",
-          ticketInfo##comment,
+          commentIndex,
         )
       )
     )
-    |> Js.Promise.then_(_ => {
+    |> Js.Promise.then_(result => {
       Result.make(
         ~statusCode=200,
         ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Json.stringify(Js.Json.null),
+        ~body=Js.Json.stringifyAny(result) |> Js.Option.getExn,
         (),
       )
       |> Js.Promise.resolve;

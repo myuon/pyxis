@@ -159,6 +159,7 @@ module Ticket = {
     belongs_to: Js.t({ .
       project: string,
     }),
+    owned_by: string,
   });
 
   external parse_ : Js.Json.t => t = "%identity";
@@ -172,7 +173,8 @@ module Ticket = {
       assigned_to: t##assigned_to,
       belongs_to: {
         project: t##belongs_to##project,
-      }
+      },
+      owned_by: t##owned_by,
     }]
   };
 
@@ -253,22 +255,20 @@ module Ticket = {
     });
   };
 
-  let update = (ticketId, _label, value) => {
-    Json.Encode.(
-      object_([
-        ("TableName", string("tickets")),
-        ("Key", object_([
-          ("id", string(ticketId)),
-          ("sort", string("detail")),
-        ])),
-        ("AttributeUpdates", object_([
-          ("Action", string("PUT")),
-          ("Value", int(value)),
-        ])),
-      ])
-    )
+  let update = (ticketId, label, value) => {
+    {
+      "TableName": "entities",
+      "Key": {
+        "id": {j|ticket-$ticketId|j},
+        "sort": "detail",
+      },
+      "UpdateExpression": "set #label = :value",
+      "ExpressionAttributeNames": { "#label": label },
+      "ExpressionAttributeValues": { ":value": value },
+    }
+    |> encode
     |> update(dbc,_)
-    |> promise
+    |> promise;
   };
 
   let delete = (ticketId) => {
@@ -487,15 +487,31 @@ module Comment = {
     })
   };
 
-  let create = (item) => {
-    Json.Encode.(
-      object_([
-        ("TableName", string("tickets")),
-        ("Item", item |> encodeDBObject),
-      ])
-    )
+  let create : (string, {
+    .
+    "content": string,
+    "belongs_to": {
+      .
+      "project": string,
+      "ticket": string,
+    },
+    "owned_by": string,
+  }) => Js.Promise.t(Js.Json.t) = (commentId, item) => {
+    {
+      "TableName": "entities",
+      "Item": [%bs.obj {
+        id: item##belongs_to##ticket,
+        sort: {j|comment-$commentId|j},
+        content: item##content,
+        belongs_to: item##belongs_to,
+        created_at: Js.Date.make(),
+        owned_by: item##owned_by,
+      }]
+      |> (encode : t => Js.Json.t)
+    }
+    |> encode
     |> put(dbc,_)
-    |> promise
+    |> promise;
   };
 };
 

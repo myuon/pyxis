@@ -90,27 +90,6 @@ let create = (event, _context) => {
   });
 };
 
-let get = (event, _context) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
-  let projectId = event
-    |> pathParametersGet
-    |> Js.Option.getExn
-    |> Js.Dict.unsafeGet(_, "projectId");
-
-  DB.Project.get(me, projectId)
-  |> Js.Promise.then_((result : DB.QueryResult.one(Entity.Project.t)) => {
-    Result.make(
-      ~statusCode=200,
-      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringify(result.item |> Entity.Project.encode),
-      ()
-    )
-    |> Js.Promise.resolve
-  })
-};
-
 let remove = (event, _context) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;

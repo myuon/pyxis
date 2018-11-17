@@ -67,14 +67,6 @@ functions:
           method: post
           authorizer: authorizer
 
-  getProject:
-    handler: src/functions/Project.bs.get
-    events:
-      - http:
-          path: /projects/{projectId}
-          method: get
-          authorizer: authorizer
-
   removeProject:
     handler: src/functions/Project.bs.remove
     events:

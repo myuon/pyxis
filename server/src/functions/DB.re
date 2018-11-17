@@ -22,6 +22,8 @@ let dbc : client = if (Node.Process.process##env |> Js.Dict.get(_, "IS_OFFLINE")
 [@bs.send] external put : (client, Js.Json.t) => awsRequest = "put";
 [@bs.send] external query : (client, Js.Json.t) => awsRequest = "query";
 [@bs.send] external update : (client, Js.Json.t) => awsRequest = "update";
+[@bs.send] external delete : (client, Js.Json.t) => awsRequest = "delete";
+[@bs.send] external batchWrite : (client, Js.Json.t) => awsRequest = "batchWrite";
 [@bs.send] external promise : awsRequest => Js.Promise.t(Js.Json.t) = "promise";
 
 module QueryResult = {
@@ -268,6 +270,43 @@ module Ticket = {
     |> update(dbc,_)
     |> promise
   };
+
+  let delete = (ticketId) => {
+    {
+      "TableName": "entities",
+      "KeyConditionExpression": "id = :id",
+      "ExpressionAttributeValues": {
+        ":id": {j|ticket-$ticketId|j},
+      },
+    }
+    |> encode
+    |> query(dbc,_)
+    |> promise
+    |> Js.Promise.then_(result => {
+      result
+      |> QueryResult.parseMany(x => x)
+      |> Js.Promise.resolve;
+    })
+    |> Js.Promise.then_((result : QueryResult.many(Js.Json.t)) => {
+      {
+        "RequestItems": {
+          "entities": result.items |> Belt.Array.map(_, item => {
+            {
+              "DeleteRequest": {
+                "Key": {
+                  "id": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "id"),
+                  "sort": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "sort"),
+                }
+              }
+            };
+          })
+        }
+      }
+      |> encode
+      |> batchWrite(dbc,_)
+      |> promise;
+    });
+  }
 };
 
 module Page = {

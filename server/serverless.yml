@@ -91,6 +91,14 @@ functions:
           method: get
           authorizer: authorizer
 
+  removeTicket:
+    handler: src/functions/Ticket.bs.remove
+    events:
+      - http:
+          path: /tickets/{ticketId}
+          method: delete
+          authorizer: authorizer
+
   listPages:
     handler: src/functions/Page.bs.get
     events:

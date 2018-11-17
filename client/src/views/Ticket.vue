@@ -126,6 +126,8 @@
         </el-collapse-item>
 
       </el-collapse>
+
+      <el-button @click="deleteTicket" style="margin-top: 1rem; margin-bottom: 1rem; float: right;" type="danger" size="small" icon="el-icon-delete">Delete</el-button>
     </el-card>
   </div>
 </template>
@@ -174,6 +176,10 @@ export default {
     },
     loadComments: async function () {
       this.comments = await client.comment.list(this.$route.params.ticketId);
+    },
+    deleteTicket: async function () {
+      await client.ticket.delete(this.ticket.id);
+      this.$router.push('/');
     },
   },
   mounted: async function () {

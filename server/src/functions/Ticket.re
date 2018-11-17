@@ -88,5 +88,27 @@ let create = (event, _context) => {
       |> Js.Promise.resolve;
     })
     |> Js.Promise.resolve;
-  })
+  });
+};
+
+let remove = (event, _context) => {
+  open AwsLambda.APIGatewayProxy;
+  open AwsLambda.APIGatewayProxy.Event;
+
+  let ticketId = event
+    |> pathParametersGet
+    |> Js.Option.getExn
+    |> Js.Dict.get(_, "ticketId")
+    |> Js.Option.getExn;
+
+  DB.Ticket.delete(ticketId)
+  |> Js.Promise.then_(result => {
+      Result.make(
+        ~statusCode=200,
+        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+        ~body=Js.Json.stringify(result),
+        ()
+      )
+      |> Js.Promise.resolve;
+  });
 };

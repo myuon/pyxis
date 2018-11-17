@@ -19,6 +19,23 @@ let get = (api) => {
   |> Js.Promise.then_(result => result |> Js.Json.parseExn |> decode |> Js.Promise.resolve);
 };
 
+let delete = (api) => {
+  open JustgageReasonCookie;
+  let token = Cookie.getAsString("token");
+
+  Fetch.fetchWithInit(
+    {j|$endpoint$api|j},
+    Fetch.RequestInit.make(
+      ~method_=Delete,
+      ~headers=Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}}),
+      ~credentials=Include,
+      ()
+    )
+  )
+  |> Js.Promise.then_(Fetch.Response.text)
+  |> Js.Promise.then_(result => result |> Js.Json.parseExn |> decode |> Js.Promise.resolve);
+};
+
 let post = (api, body) => {
   open JustgageReasonCookie;
   let token = Cookie.getAsString("token");
@@ -73,6 +90,7 @@ let client : {
       },
       "owned_by": string,
     } => Js.Promise.t(Js.Json.t),
+    "delete": string => Js.Promise.t(Js.Json.t),
   },
   "comment": {
     .
@@ -137,6 +155,7 @@ let client : {
   "ticket": {
     "create": (json) => post("/tickets/", json |> encode),
     "get": (ticketId) => get({j|/tickets/$ticketId|j}),
+    "delete": (ticketId) => delete({j|/tickets/$ticketId|j}),
   },
   "comment": {
     "list": (ticketId) => get({j|/tickets/$ticketId/comments|j}),

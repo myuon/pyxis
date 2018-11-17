@@ -12,6 +12,10 @@ SignIn flow:
 1. Verify token and verify userId in DB
 1. Create jwt
 
+## Google login
+
+Place `google.json` file (which includes `.web.client_id` information) in `/token`
+
 ## JWT
 
 JWT (Json Web Token) is used for authentication and authorization.

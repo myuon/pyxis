@@ -176,6 +176,41 @@ module Ticket = {
 
   external encode : 'a => Js.Json.t = "%identity";
 
+  let create : Js.t({
+    .
+    title: string,
+    assigned_to: array(string),
+    belongs_to: Js.t({
+      .
+      project: string,
+    }),
+    owned_by: string,
+  }) => Js.Promise.t(string) = (json) => {
+    let id = UUID.uuid();
+
+    {
+      "TableName": "entities",
+      "Item": {
+        "id": {j|ticket-$id|j},
+        "sort": "detail",
+        "title": json##title,
+        "comment": 0,
+        "assigned_to": json##assigned_to,
+        "belongs_to": {
+          "project": json##belongs_to##project,
+        },
+        "owned_by": json##owned_by,
+      }
+    }
+    |> encode
+    |> put(dbc,_)
+    |> promise
+    |> Js.Promise.then_(_ => {
+      id
+      |> Js.Promise.resolve;
+    });
+  };
+
   let list = (userId) => {
     {
       "TableName": "entities",
@@ -246,6 +281,7 @@ module Page = {
       project: string,
       ticket: string,
     }),
+    owned_by: string,
   });
 
   external parse_ : Js.Json.t => t = "%identity";
@@ -259,7 +295,8 @@ module Page = {
       belongs_to: {
         project: t##belongs_to##project,
         ticket: t##belongs_to##ticket,
-      }
+      },
+      owned_by: t##owned_by,
     }]
   };
 
@@ -294,6 +331,39 @@ module Page = {
       |> QueryResult.parseMany(parse)
       |> Js.Promise.resolve
     })
+  };
+
+  let create : Js.t({
+    .
+    id: string,
+    title: string,
+    content: string,
+    belongs_to: Js.t({
+      .
+      project: string,
+      ticket: string,
+    }),
+    owned_by: string,
+  }) => Js.Promise.t(Js.Json.t) = (json) => {
+    let ticketId = json##belongs_to##ticket;
+    let pageId = json##id;
+
+    {
+      "TableName": "entities",
+      "Item": {
+        "id": {j|ticket-$ticketId|j},
+        "sort": {j|page-$pageId|j},
+        "title": json##title,
+        "content": if (json##content != "") { json##content } else { [%raw {| null |}] },
+        "belongs_to": {
+          "project": json##belongs_to##project,
+        },
+        "owned_by": json##owned_by,
+      }
+    }
+    |> encode
+    |> put(dbc,_)
+    |> promise;
   };
 };
 

@@ -62,7 +62,17 @@ let client : {
         .
         "project": string,
       },
-    })
+    }),
+    "create": {
+      .
+      "title": string,
+      "assigned_to": array(string),
+      "belongs_to": {
+        .
+        "project": string,
+      },
+      "owned_by": string,
+    } => Js.Promise.t(Js.Json.t),
   },
   "comment": {
     .
@@ -125,6 +135,7 @@ let client : {
       }),
   },
   "ticket": {
+    "create": (json) => post("/tickets/", json |> encode),
     "get": (ticketId) => get({j|/tickets/$ticketId|j}),
   },
   "comment": {

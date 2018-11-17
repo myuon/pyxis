@@ -179,7 +179,10 @@ export default {
   mounted: async function () {
     this.ticket = await client.ticket.get(this.$route.params.ticketId);
     await this.loadComments();
-    this.pages = await client.page.list(this.$route.params.ticketId);
+    this.pages = (await client.page.list(this.$route.params.ticketId)).map(item => {
+      item.content = item.content == null ? '' : item.content;
+      return item;
+    });
   },
 }
 </script>

@@ -75,6 +75,14 @@ functions:
           method: get
           authorizer: authorizer
 
+  createTicket:
+    handler: src/functions/Ticket.bs.create
+    events:
+      - http:
+          path: /tickets/
+          method: post
+          authorizer: authorizer
+
   getTicket:
     handler: src/functions/Ticket.bs.get
     events:

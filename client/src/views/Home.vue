@@ -28,8 +28,39 @@
         </el-table-column>
       </el-table>
 
-      <el-button type="default" icon="el-icon-plus" size="small">New Ticket</el-button>
+      <el-button type="default" icon="el-icon-plus" size="small" @click="newTicketDialog = true; selectingProject = project.id;">New Ticket</el-button>
+      <el-button type="danger" icon="el-icon-minus" size="small">Delete</el-button>
     </div>
+
+    <el-dialog
+      title="Create New Ticket"
+      :visible.sync="newTicketDialog"
+      width="60%"
+      :before-close="handleClose"
+    >
+      <el-form :model="projectForm" label-width="120px">
+        <el-form-item label="Ticket Title">
+          <el-input placeholder="Title" v-model="ticketForm.title"></el-input>
+        </el-form-item>
+        <el-form-item label="Assigned to">
+          <el-select v-model="ticketForm.assigned_to" multiple placeholder="Select">
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Deadline">
+          <el-date-picker
+            v-model="ticketForm.deadline"
+            type="date"
+            placeholder="Pick a day"
+          >
+          </el-date-picker>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="newTicketDialog = false">Cancel</el-button>
+        <el-button type="primary" @click="createTicket" :disabled="ticketForm.title == ''">Confirm</el-button>
+      </span>
+    </el-dialog>
 
     <div>
       <el-button type="success" icon="el-icon-plus" @click="newProjectDialog = true">New Project</el-button>
@@ -65,7 +96,14 @@ export default {
       newProjectDialog: false,
       projectForm: {
         title: '',
-      }
+      },
+      newTicketDialog: false,
+      selectingProject: '',
+      ticketForm: {
+        title: '',
+        assigned_to: [],
+        deadline: null,
+      },
     };
   },
   methods: {
@@ -86,6 +124,26 @@ export default {
     },
     loadRecentProjects: async function() {
       this.recent = await client.project.listRecent();
+      console.log(this.recent);
+    },
+    createTicket: async function() {
+      const res = await client.ticket.create({
+        title: this.ticketForm.title,
+        assigned_to: this.ticketForm.assigned_to,
+        deadline: this.ticketForm.deadline,
+        belongs_to: {
+          project: this.selectingProject,
+        },
+        owned_by: "1",
+      });
+      await this.loadRecentProjects();
+      this.newTicketDialog = false;
+
+      this.ticketForm = {
+        title: '',
+        assigned_to: [],
+        deadline: null,
+      };
     },
   },
   mounted: async function () {

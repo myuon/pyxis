@@ -11,6 +11,7 @@ type t = Js.t({
 });
 
 external parse : DB.Ticket.t => t = "%identity";
+external decode : Js.Json.t => 'a = "%identity";
 external encode : t => Js.Json.t = "%identity";
 
 let get = (event, _context) => {
@@ -43,5 +44,49 @@ let get = (event, _context) => {
     );
 
     Js.Promise.resolve(result);
+  })
+};
+
+let create = (event, _context) => {
+  open AwsLambda.APIGatewayProxy;
+  open AwsLambda.APIGatewayProxy.Event;
+
+  let input : Js.t({
+    .
+    title: string,
+    assigned_to: array(string),
+    belongs_to: Js.t({
+      .
+      project: string,
+    }),
+    owned_by: string,
+  }) = event
+    |> bodyGet
+    |> Js.Option.getExn
+    |> Js.Json.parseExn
+    |> decode;
+
+  DB.Ticket.create(input)
+  |> Js.Promise.then_((ticketId : string) => {
+    DB.Page.create([%bs.obj {
+      id: "1",
+      title: "New Document",
+      content: "",
+      belongs_to: {
+        project: input##belongs_to##project,
+        ticket: ticketId,
+      },
+      owned_by: input##owned_by,
+    }])
+    |> Js.Promise.then_(result => {
+      Result.make(
+        ~statusCode=200,
+        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+        ~body=Js.Json.stringify(result),
+        ()
+      )
+      |> Js.Promise.resolve;
+    })
+    |> Js.Promise.resolve;
   })
 };

@@ -17,13 +17,14 @@
     "id": "project-abcd",
     "sort": "detail",
     "title": "project AAA",
+    "tickets": [ "ABCD", "EFGH" ],
     "owned_by": "1"
   },
   {
     "id": "project-efgh",
     "sort": "detail",
     "title": "project QQQ",
-    "tickets": [ "ABCD" ],
+    "tickets": [ "IJKL" ],
     "owned_by": "1"
   },
   {

@@ -75,6 +75,14 @@ functions:
           method: get
           authorizer: authorizer
 
+  removeProject:
+    handler: src/functions/Project.bs.remove
+    events:
+      - http:
+          path: /projects/{projectId}
+          method: delete
+          authorizer: authorizer
+
   createTicket:
     handler: src/functions/Ticket.bs.create
     events:

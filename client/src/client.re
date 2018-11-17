@@ -90,7 +90,7 @@ let client : {
       },
       "owned_by": string,
     } => Js.Promise.t(Js.Json.t),
-    "delete": string => Js.Promise.t(Js.Json.t),
+    "remove": string => Js.Promise.t(Js.Json.t),
   },
   "comment": {
     .
@@ -139,6 +139,7 @@ let client : {
       "title": string,
       "owned_by": string,
     })),
+    "remove": string => Js.Promise.t(Js.Json.t),
   },
 } = {
   "auth": {
@@ -165,7 +166,7 @@ let client : {
   "ticket": {
     "create": (json) => post("/tickets/", json |> encode),
     "get": (ticketId) => get({j|/tickets/$ticketId|j}),
-    "delete": (ticketId) => delete({j|/tickets/$ticketId|j}),
+    "remove": (ticketId) => delete({j|/tickets/$ticketId|j}),
   },
   "comment": {
     "list": (ticketId) => get({j|/tickets/$ticketId/comments|j}),
@@ -177,5 +178,6 @@ let client : {
   "project": {
     "create": (json) => post("/projects/", json |> encode),
     "listRecent": () => get("/projects/recent"),
+    "remove": (projectId) => delete({j|/projects/$projectId|j}),
   },
 };

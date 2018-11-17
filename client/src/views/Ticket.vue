@@ -185,7 +185,7 @@ export default {
       this.comments = await client.comment.list(this.$route.params.ticketId);
     },
     deleteTicket: async function () {
-      await client.ticket.delete(this.ticket.id);
+      await client.ticket.remove(this.ticket.id);
       this.$router.push('/');
     },
   },

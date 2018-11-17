@@ -110,3 +110,25 @@ let get = (event, _context) => {
     |> Js.Promise.resolve
   })
 };
+
+let remove = (event, _context) => {
+  open AwsLambda.APIGatewayProxy;
+  open AwsLambda.APIGatewayProxy.Event;
+
+  let projectId = event
+    |> pathParametersGet
+    |> Js.Option.getExn
+    |> Js.Dict.get(_, "projectId")
+    |> Js.Option.getExn;
+
+  DB.Project.delete(projectId)
+  |> Js.Promise.then_(result => {
+      Result.make(
+        ~statusCode=200,
+        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+        ~body=Js.Json.stringify(result),
+        ()
+      )
+      |> Js.Promise.resolve;
+  });
+};

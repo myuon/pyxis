@@ -57,6 +57,7 @@ module Project = {
     .
     id: string,
     title: string,
+    tickets: array(string),
     owned_by: string,
   });
 
@@ -67,6 +68,7 @@ module Project = {
     [%bs.obj {
       id: t##id |> Js.String.split("project-") |> x => x[1],
       title: t##title,
+      tickets: t##tickets,
       owned_by: t##owned_by,
     }]
   };
@@ -136,6 +138,43 @@ module Project = {
     |> encode
     |> put(dbc,_)
     |> promise;
+  };
+
+  let delete = (projectId) => {
+    {
+      "TableName": "entities",
+      "KeyConditionExpression": "id = :id",
+      "ExpressionAttributeValues": {
+        ":id": {j|project-$projectId|j},
+      },
+    }
+    |> encode
+    |> query(dbc,_)
+    |> promise
+    |> Js.Promise.then_(result => {
+      result
+      |> QueryResult.parseMany(x => x)
+      |> Js.Promise.resolve;
+    })
+    |> Js.Promise.then_((result : QueryResult.many(Js.Json.t)) => {
+      {
+        "RequestItems": {
+          "entities": result.items |> Belt.Array.map(_, item => {
+            {
+              "DeleteRequest": {
+                "Key": {
+                  "id": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "id"),
+                  "sort": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "sort"),
+                }
+              }
+            };
+          })
+        }
+      }
+      |> encode
+      |> batchWrite(dbc,_)
+      |> promise;
+    });
   };
 };
 
@@ -306,7 +345,7 @@ module Ticket = {
       |> batchWrite(dbc,_)
       |> promise;
     });
-  }
+  };
 };
 
 module Page = {

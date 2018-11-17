@@ -29,7 +29,7 @@
       </el-table>
 
       <el-button type="default" icon="el-icon-plus" size="small" @click="newTicketDialog = true; selectingProject = project.id;">New Ticket</el-button>
-      <el-button type="danger" icon="el-icon-minus" size="small">Delete</el-button>
+      <el-button type="danger" icon="el-icon-delete" size="small" @click="deleteProject(project.id)">Delete</el-button>
     </div>
 
     <el-dialog
@@ -121,6 +121,10 @@ export default {
       this.newProjectDialog = false;
 
       this.projectForm.title = '';
+    },
+    deleteProject: async function(id) {
+      await client.project.remove(id);
+      await this.loadRecentProjects();
     },
     loadRecentProjects: async function() {
       this.recent = await client.project.listRecent();

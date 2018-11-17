@@ -94,6 +94,7 @@ let client : {
   },
   "project": {
     .
+    "create": {. "title": string, "owned_by": string} => Js.Promise.t(Js.Json.t),
     "listRecent": unit => Js.Promise.t(array({
       .
       "id": string,
@@ -133,6 +134,7 @@ let client : {
     "list": (ticketId) => get({j|/tickets/$ticketId/pages|j}),
   },
   "project": {
+    "create": (json) => post("/projects/", json |> encode),
     "listRecent": () => get("/projects/recent"),
   },
 };

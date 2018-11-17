@@ -69,7 +69,7 @@ module Project = {
     }]
   };
 
-  external encode : t => Js.Json.t = "%identity";
+  external encode : 't => Js.Json.t = "%identity";
 
   let decodeDBObject : Js.Json.t => Entity.Project.t = json => {
     Json.Decode.{
@@ -117,6 +117,23 @@ module Project = {
       |> QueryResult.parseOne(decodeDBObject)
       |> Js.Promise.resolve
     })
+  };
+
+  let create : Js.t({. owned_by: string, title: string}) => Js.Promise.t(Js.Json.t) = (json) => {
+    let id = UUID.uuid();
+
+    {
+      "TableName": "entities",
+      "Item": {
+        "id": {j|project-$id|j},
+        "sort": "detail",
+        "title": json##title,
+        "owned_by": json##owned_by,
+      }
+    }
+    |> encode
+    |> put(dbc,_)
+    |> promise;
   };
 };
 

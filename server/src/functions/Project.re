@@ -13,6 +13,7 @@ type t = Js.t({
 });
 
 external encode : t => Js.Json.t = "%identity";
+external decode : Js.Json.t => 'a = "%identity";
 
 let listRecent = (_event, _context) => {
   open AwsLambda.APIGatewayProxy;
@@ -61,6 +62,32 @@ let listRecent = (_event, _context) => {
       |> Js.Promise.resolve;
     });
   })
+};
+
+let create = (event, _context) => {
+  open AwsLambda.APIGatewayProxy;
+  open AwsLambda.APIGatewayProxy.Event;
+
+  let input : Js.t({
+    .
+    title: string,
+    owned_by: string,
+  }) = event
+    |> bodyGet
+    |> Js.Option.getExn
+    |> Js.Json.parseExn
+    |> decode;
+
+  DB.Project.create(input)
+  |> Js.Promise.then_(result => {
+    Result.make(
+      ~statusCode=200,
+      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+      ~body=Js.Json.stringify(result),
+      ()
+    )
+    |> Js.Promise.resolve;
+  });
 };
 
 let get = (event, _context) => {

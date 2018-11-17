@@ -59,6 +59,14 @@ functions:
           method: get
           authorizer: authorizer
 
+  createProject:
+    handler: src/functions/Project.bs.create
+    events:
+      - http:
+          path: /projects/
+          method: post
+          authorizer: authorizer
+
   getProject:
     handler: src/functions/Project.bs.get
     events:

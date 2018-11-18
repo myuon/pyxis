@@ -70,9 +70,7 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, Js.Json.t) => unit) => 
     let effect = if (isAllowed) { "Allow" } else { "Deny" };
     let userId = decoded##user_id;
     let authorizerContext = [%bs.obj {
-      user: {
-        userId: userId,
-      },
+      userId: userId,
     }];
 
     raise(Return(

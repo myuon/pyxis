@@ -13,7 +13,7 @@
     <div class="login-state">
       <i class="material-icons">person_pin</i>
       <div class="user">
-        Login as {{ user.name }}
+        Login as {{ user.user_name }}
         <button @click="signOut" class="action" type="mini">Sign out</button>
       </div>
     </div>

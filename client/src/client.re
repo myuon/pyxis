@@ -64,7 +64,13 @@ let client : {
     .
     "me": unit => Js.Promise.t({
       .
-      "id": string
+      "id": string,
+      "user_name": string,
+      "created_at": string,
+      "idp": {
+        .
+        "google": string,
+      }
     }),
   },
   "ticket": {
@@ -157,12 +163,7 @@ let client : {
     }
   },
   "user": {
-    "me": () => get("/users/me")
-      |> Js.Promise.catch(err => {
-        Js.log(err);
-
-        Js.Promise.resolve({ "id": "" });
-      }),
+    "me": () => get("/users/me"),
   },
   "ticket": {
     "create": (json) => post("/tickets/", json |> encode),

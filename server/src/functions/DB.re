@@ -403,7 +403,7 @@ module User = {
       .
       google: string,
     }),
-    created_at: Js.Date.t,
+    created_at: string,
     user_name: string,
   });
 
@@ -475,6 +475,18 @@ module User = {
     DAO.create({
       "user_name": userName,
       "id": userId,
+    });
+  };
+
+  let get = (userId) => {
+    DAO.get(
+      ~id={j|user-$userId|j},
+      ~sort="detail",
+    )
+    |> Js.Promise.then_(result => {
+      result
+      |> QueryResult.parseOne(parse)
+      |> Js.Promise.resolve;
     });
   };
 };

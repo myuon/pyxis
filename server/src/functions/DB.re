@@ -68,7 +68,7 @@ module DAO = {
     |> promise;
   };
 
-  let listByOwner : (~owner: string, ~kind: string, ~sort: string = ?, unit) => Js.Promise.t(Js.Json.t) = (~owner, ~kind, ~sort=?, ()) => {
+  let listByOwner : (~owner: string, ~idPrefix: string, ~sort: string = ?, unit) => Js.Promise.t(Js.Json.t) = (~owner, ~idPrefix, ~sort=?, ()) => {
     switch sort {
       | None => {
         "TableName": "entities",
@@ -76,7 +76,7 @@ module DAO = {
         "KeyConditionExpression": "owned_by = :owned_by and begins_with(id, :id)",
         "ExpressionAttributeValues": {
           ":owned_by": owner,
-          ":id": kind,
+          ":id": idPrefix,
         }
       } |> encode
       | Some(sort) => {
@@ -86,7 +86,7 @@ module DAO = {
         "FilterExpression": "sort = :sort",
         "ExpressionAttributeValues": {
           ":owned_by": owner,
-          ":id": kind,
+          ":id": idPrefix,
           ":sort": sort
         }
       } |> encode
@@ -95,13 +95,13 @@ module DAO = {
     |> promise;
   };
 
-  let list = (~id: string, ~sort: string) => {
+  let list = (~id: string, ~sortPrefix: string) => {
     {
       "TableName": "entities",
       "KeyConditionExpression": "id = :id and begins_with(sort, :sort)",
       "ExpressionAttributeValues": {
         ":id": id,
-        ":sort": sort,
+        ":sort": sortPrefix,
       }
     }
     |> encode
@@ -165,7 +165,7 @@ module Project = {
   let list = (userId) => {
     DAO.listByOwner(
       ~owner=userId,
-      ~kind="project",
+      ~idPrefix="project",
       ()
     )
     |> Js.Promise.then_(result => {
@@ -287,7 +287,7 @@ module Ticket = {
   let list = (userId) => {
     DAO.listByOwner(
       ~owner=userId,
-      ~kind="ticket",
+      ~idPrefix="ticket",
       ~sort="detail",
       ()
     )
@@ -392,7 +392,7 @@ module Page = {
   let list = (ticketId) => {
     DAO.list(
       ~id={j|ticket-$ticketId|j},
-      ~sort="page",
+      ~sortPrefix="page",
     )
     |> Js.Promise.then_(result => {
       result
@@ -466,7 +466,7 @@ module Comment = {
   let list = (ticketId) => {
     DAO.list(
       ~id={j|ticket-$ticketId|j},
-      ~sort="comment",
+      ~sortPrefix="comment",
     )
     |> Js.Promise.then_(result => {
       result

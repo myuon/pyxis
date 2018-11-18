@@ -68,20 +68,26 @@ module DAO = {
     |> promise;
   };
 
-  let get : Js.t({. id: string, sort: string}) => Js.Promise.t(Js.Json.t) = (item) => {
+  let get : (~id: string, ~sort: string) => Js.Promise.t(Js.Json.t) = (~id, ~sort) => {
     {
       "TableName": "entities",
-      "Key": item |> encode,
+      "Key": {
+        "id": id,
+        "sort": sort,
+      },
     }
     |> encode
     |> get(dbc,_)
     |> promise;
   };
 
-  let update : (Js.t({. id: string, sort: string}), string, 'a) => Js.Promise.t(Js.Json.t) = (key, label, value) => {
+  let update : (~id: string, ~sort: string, ~label: string, ~value: 'a) => Js.Promise.t(Js.Json.t) = (~id, ~sort, ~label, ~value) => {
     {
       "TableName": "entities",
-      "Key": key,
+      "Key": {
+        "id": id,
+        "sort": sort,
+      },
       "UpdateExpression": "set #label = :value",
       "ExpressionAttributeNames": { "#label": label },
       "ExpressionAttributeValues": { ":value": value },
@@ -268,10 +274,10 @@ module Ticket = {
   };
 
   let get = (ticketId) => {
-    DAO.get({
-      "id": {j|ticket-$ticketId|j},
-      "sort": "detail",
-    })
+    DAO.get(
+      ~id={j|ticket-$ticketId|j},
+      ~sort="detail",
+    )
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseOne(parse)
@@ -280,10 +286,12 @@ module Ticket = {
   };
 
   let update = (ticketId, label, value) => {
-    DAO.update({
-      "id": {j|ticket-$ticketId|j},
-      "sort": "detail",
-    }, label, value);
+    DAO.update(
+      ~id={j|ticket-$ticketId|j},
+      ~sort="detail",
+      ~label=label,
+      ~value=value
+    );
   };
 
   let delete = (ticketId) => {
@@ -532,10 +540,10 @@ module User = {
   };
 
   let findById = userId => {
-    DAO.get({
-      "id": {j|user-$userId|j},
-      "sort": "detail",
-    })
+    DAO.get(
+      ~id={j|user-$userId|j},
+      ~sort="detail",
+    )
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseOne(parse)
@@ -544,10 +552,10 @@ module User = {
   };
 
   let findViaIdp = (idp, idp_id) => {
-    DAO.get({
-      "id": {j|idp-$idp-$idp_id|j},
-      "sort": "detail",
-    })
+    DAO.get(
+      ~id={j|idp-$idp-$idp_id|j},
+      ~sort="detail",
+    )
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseOne(Idp.parse)

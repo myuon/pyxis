@@ -9,23 +9,6 @@ let aws = xray([%bs.raw {| require('aws-sdk') |}]);
 type awsRequest;
 type client;
 
-let dbc : client = if (Node.Process.process##env |> Js.Dict.get(_, "IS_OFFLINE") == Some("true")) {
-  [%bs.raw {| new aws.DynamoDB.DocumentClient({
-    region: 'localhost',
-    endpoint: 'http://localhost:8000',
-  }) |}]
-} else {
-  [%bs.raw {| new aws.DynamoDB.DocumentClient() |}]
-};
-
-[@bs.send] external get : (client, Js.Json.t) => awsRequest = "get";
-[@bs.send] external put : (client, Js.Json.t) => awsRequest = "put";
-[@bs.send] external query : (client, Js.Json.t) => awsRequest = "query";
-[@bs.send] external update : (client, Js.Json.t) => awsRequest = "update";
-[@bs.send] external delete : (client, Js.Json.t) => awsRequest = "delete";
-[@bs.send] external batchWrite : (client, Js.Json.t) => awsRequest = "batchWrite";
-[@bs.send] external promise : awsRequest => Js.Promise.t(Js.Json.t) = "promise";
-
 module QueryResult = {
   type one('t) = {
     item: 't,
@@ -52,8 +35,24 @@ module QueryResult = {
   };
 };
 
-module DAO = {  
+module DAO = {
   module DBC = {
+    let dbc : client = if (Node.Process.process##env |> Js.Dict.get(_, "IS_OFFLINE") == Some("true")) {
+      [%bs.raw {| new aws.DynamoDB.DocumentClient({
+        region: 'localhost',
+        endpoint: 'http://localhost:8000',
+      }) |}]
+    } else {
+      [%bs.raw {| new aws.DynamoDB.DocumentClient() |}]
+    };
+
+    [@bs.send] external get : (client, Js.Json.t) => awsRequest = "get";
+    [@bs.send] external put : (client, Js.Json.t) => awsRequest = "put";
+    [@bs.send] external query : (client, Js.Json.t) => awsRequest = "query";
+    [@bs.send] external update : (client, Js.Json.t) => awsRequest = "update";
+    [@bs.send] external delete : (client, Js.Json.t) => awsRequest = "delete";
+    [@bs.send] external batchWrite : (client, Js.Json.t) => awsRequest = "batchWrite";
+    [@bs.send] external promise : awsRequest => Js.Promise.t(Js.Json.t) = "promise";
   };
 
   external encode : 'a => Js.Json.t = "%identity";
@@ -64,8 +63,8 @@ module DAO = {
       "Item": item |> encode,
     }
     |> encode
-    |> put(dbc,_)
-    |> promise;
+    |> DBC.put(DBC.dbc,_)
+    |> DBC.promise;
   };
 
   let listByOwner : (~owner: string, ~idPrefix: string, ~sort: string = ?, unit) => Js.Promise.t(Js.Json.t) = (~owner, ~idPrefix, ~sort=?, ()) => {
@@ -91,8 +90,8 @@ module DAO = {
         }
       } |> encode
     }
-    |> query(dbc,_)
-    |> promise;
+    |> DBC.query(DBC.dbc,_)
+    |> DBC.promise;
   };
 
   let list : (~id: string, ~sortPrefix: string = ?, unit) => Js.Promise.t(Js.Json.t) = (~id, ~sortPrefix=?, ()) => {
@@ -114,8 +113,8 @@ module DAO = {
       } |> encode
     }
     |> encode
-    |> query(dbc,_)
-    |> promise
+    |> DBC.query(DBC.dbc,_)
+    |> DBC.promise
   };
 
   let get : (~id: string, ~sort: string) => Js.Promise.t(Js.Json.t) = (~id, ~sort) => {
@@ -127,8 +126,8 @@ module DAO = {
       },
     }
     |> encode
-    |> get(dbc,_)
-    |> promise;
+    |> DBC.get(DBC.dbc,_)
+    |> DBC.promise;
   };
 
   let update : (~id: string, ~sort: string, ~label: string, ~value: 'a) => Js.Promise.t(Js.Json.t) = (~id, ~sort, ~label, ~value) => {
@@ -143,8 +142,8 @@ module DAO = {
       "ExpressionAttributeValues": { ":value": value },
     }
     |> encode
-    |> update(dbc,_)
-    |> promise;
+    |> DBC.update(DBC.dbc,_)
+    |> DBC.promise;
   };
 
   let batchDelete : array({. "id": string, "sort": string}) => Js.Promise.t(Js.Json.t) = (items) => {
@@ -163,8 +162,8 @@ module DAO = {
       }
     }
     |> encode
-    |> batchWrite(dbc,_)
-    |> promise;
+    |> DBC.batchWrite(DBC.dbc,_)
+    |> DBC.promise;
   };
 };
 

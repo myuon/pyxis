@@ -68,23 +68,34 @@ let create = (event, _context) => {
 
   DB.Ticket.create(input)
   |> Js.Promise.then_((ticketId : string) => {
-    DB.Page.create([%bs.obj {
-      id: "1",
-      title: "New Document",
-      content: "",
-      belongs_to: {
-        project: input##belongs_to##project,
-        ticket: ticketId,
-      },
-      owned_by: input##owned_by,
-    }])
-    |> Js.Promise.then_(result => {
-      
+    Js.Promise.all2((
+      DB.Project.get(input##belongs_to##project)
+      |> Js.Promise.then_((result: DB.QueryResult.one(DB.Project.t)) => {
+        let tickets = result.item##tickets;
+        tickets |> Js.Array.push(ticketId);
 
+        DB.Project.update(
+          input##belongs_to##project,
+          "tickets",
+          tickets
+        );
+      }),
+      DB.Page.create([%bs.obj {
+        id: "1",
+        title: "New Document",
+        content: "",
+        belongs_to: {
+          project: input##belongs_to##project,
+          ticket: ticketId,
+        },
+        owned_by: input##owned_by,
+      }])
+    ))
+    |> Js.Promise.then_(result => {
       Result.make(
         ~statusCode=200,
         ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Js.Json.stringify(result),
+        ~body=Js.Json.stringifyAny(result) |> Js.Option.getExn,
         ()
       )
       |> Js.Promise.resolve;

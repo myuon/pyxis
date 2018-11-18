@@ -137,6 +137,7 @@ let client : {
       .
       "id": string,
       "title": string,
+      "tickets": array(string),
       "owned_by": string,
     })),
     "remove": string => Js.Promise.t(Js.Json.t),

@@ -71,6 +71,27 @@ module Project = {
     });
   };
 
+  let update = (projectId, label, value) => {
+    DAO.update(
+      ~id={j|project-$projectId|j},
+      ~sort="detail",
+      ~label=label,
+      ~value=value
+    );
+  };
+
+  let get = (projectId) => {
+    DAO.get(
+      ~id={j|project-$projectId|j},
+      ~sort="detail",
+    )
+    |> Js.Promise.then_(result => {
+      result
+      |> QueryResult.parseOne(parse)
+      |> Js.Promise.resolve;
+    });
+  };
+
   let delete = (projectId) => {
     DAO.list(
       ~id={j|project-$projectId|j},

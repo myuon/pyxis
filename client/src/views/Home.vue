@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div :key="project.id" v-for="project in recent" style="margin-bottom: 1rem;">
-      <h3>{{ project.title }}</h3>
+      <h3>{{ project.title }} ({{ project.tickets.length }})</h3>
 
       <el-table
         :data="project.tickets"

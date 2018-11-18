@@ -41,3 +41,9 @@ Payload:
   }
 }
 ```
+
+## Build
+
+- Generates keys (google auth token/jwt keys) explained above
+- Run `sls dynamodb install` before starting serverless offline server
+- Set `aws credentials` for awscli

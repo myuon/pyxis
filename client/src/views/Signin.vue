@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import token from '@/token';
+import token from '../../../token/google.json';
 import { client } from '@/client.bs';
 
 export default {
@@ -40,7 +40,7 @@ export default {
       activeTab: 'signIn',
       authConfig: {},
       googleSignInParams: {
-        client_id: token.google.clientId,
+        client_id: token.web.client_id,
       },
     };
   },

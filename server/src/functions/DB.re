@@ -95,14 +95,23 @@ module DAO = {
     |> promise;
   };
 
-  let list = (~id: string, ~sortPrefix: string) => {
-    {
-      "TableName": "entities",
-      "KeyConditionExpression": "id = :id and begins_with(sort, :sort)",
-      "ExpressionAttributeValues": {
-        ":id": id,
-        ":sort": sortPrefix,
-      }
+  let list : (~id: string, ~sortPrefix: string = ?, unit) => Js.Promise.t(Js.Json.t) = (~id, ~sortPrefix=?, ()) => {
+    switch sortPrefix {
+      | None => {
+        "TableName": "entities",
+        "KeyConditionExpression": "id = :id",
+        "ExpressionAttributeValues": {
+          ":id": id,
+        }
+      } |> encode
+      | Some(sortPrefix) => {
+        "TableName": "entities",
+        "KeyConditionExpression": "id = :id and begins_with(sort, :sort)",
+        "ExpressionAttributeValues": {
+          ":id": id,
+          ":sort": sortPrefix,
+        }
+      } |> encode
     }
     |> encode
     |> query(dbc,_)
@@ -135,6 +144,26 @@ module DAO = {
     }
     |> encode
     |> update(dbc,_)
+    |> promise;
+  };
+
+  let batchDelete : array({. "id": string, "sort": string}) => Js.Promise.t(Js.Json.t) = (items) => {
+    {
+      "RequestItems": {
+        "entities": items |> Belt.Array.map(_, item => {
+          {
+            "DeleteRequest": {
+              "Key": {
+                "id": item##id,
+                "sort": item##sort,
+              }
+            }
+          };
+        })
+      }
+    }
+    |> encode
+    |> batchWrite(dbc,_)
     |> promise;
   };
 };
@@ -187,39 +216,21 @@ module Project = {
   };
 
   let delete = (projectId) => {
-    {
-      "TableName": "entities",
-      "KeyConditionExpression": "id = :id",
-      "ExpressionAttributeValues": {
-        ":id": {j|project-$projectId|j},
-      },
-    }
-    |> encode
-    |> query(dbc,_)
-    |> promise
+    DAO.list(
+      ~id={j|project-$projectId|j},
+      ()
+    )
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseMany(x => x)
-      |> Js.Promise.resolve;
-    })
-    |> Js.Promise.then_((result : QueryResult.many(Js.Json.t)) => {
-      {
-        "RequestItems": {
-          "entities": result.items |> Belt.Array.map(_, item => {
-            {
-              "DeleteRequest": {
-                "Key": {
-                  "id": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "id"),
-                  "sort": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "sort"),
-                }
-              }
-            };
-          })
-        }
-      }
-      |> encode
-      |> batchWrite(dbc,_)
-      |> promise;
+      |> x => x.items
+      |> Belt.Array.map(_, item => {
+        {
+          "id": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "id") |> Js.Json.decodeString |> Js.Option.getExn,
+          "sort": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "sort") |> Js.Json.decodeString |> Js.Option.getExn,
+        }        
+      })
+      |> DAO.batchDelete;
     });
   };
 };
@@ -320,39 +331,21 @@ module Ticket = {
   };
 
   let delete = (ticketId) => {
-    {
-      "TableName": "entities",
-      "KeyConditionExpression": "id = :id",
-      "ExpressionAttributeValues": {
-        ":id": {j|ticket-$ticketId|j},
-      },
-    }
-    |> encode
-    |> query(dbc,_)
-    |> promise
+    DAO.list(
+      ~id={j|ticket-$ticketId|j},
+      ()
+    )
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseMany(x => x)
-      |> Js.Promise.resolve;
-    })
-    |> Js.Promise.then_((result : QueryResult.many(Js.Json.t)) => {
-      {
-        "RequestItems": {
-          "entities": result.items |> Belt.Array.map(_, item => {
-            {
-              "DeleteRequest": {
-                "Key": {
-                  "id": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "id"),
-                  "sort": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "sort"),
-                }
-              }
-            };
-          })
+      |> x => x.items
+      |> Belt.Array.map(_, item => {
+        {
+          "id": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "id") |> Js.Json.decodeString |> Js.Option.getExn,
+          "sort": item |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.unsafeGet(_, "sort") |> Js.Json.decodeString |> Js.Option.getExn,
         }
-      }
-      |> encode
-      |> batchWrite(dbc,_)
-      |> promise;
+      })
+      |> DAO.batchDelete;
     });
   };
 };
@@ -393,6 +386,7 @@ module Page = {
     DAO.list(
       ~id={j|ticket-$ticketId|j},
       ~sortPrefix="page",
+      ()
     )
     |> Js.Promise.then_(result => {
       result
@@ -467,6 +461,7 @@ module Comment = {
     DAO.list(
       ~id={j|ticket-$ticketId|j},
       ~sortPrefix="comment",
+      ()
     )
     |> Js.Promise.then_(result => {
       result

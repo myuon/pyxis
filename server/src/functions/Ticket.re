@@ -72,7 +72,7 @@ let create = (event, _context) => {
       DB.Project.get(input##belongs_to##project)
       |> Js.Promise.then_((result: DB.QueryResult.one(DB.Project.t)) => {
         let tickets = result.item##tickets;
-        tickets |> Js.Array.push(ticketId);
+        let _ = tickets |> Js.Array.push(ticketId);
 
         DB.Project.update(
           input##belongs_to##project,
@@ -114,12 +114,28 @@ let remove = (event, _context) => {
     |> Js.Dict.get(_, "ticketId")
     |> Js.Option.getExn;
 
-  DB.Ticket.delete(ticketId)
+  Js.Promise.all2((
+    DB.Ticket.delete(ticketId),
+    DB.Ticket.get(ticketId)
+    |> Js.Promise.then_((result : DB.QueryResult.one(DB.Ticket.t)) => {
+      let projectId = result.item##belongs_to##project;
+      DB.Project.get(projectId)
+      |> Js.Promise.then_((result : DB.QueryResult.one(DB.Project.t)) => {
+        let tickets = result.item##tickets;
+
+        DB.Project.update(
+          projectId,
+          "tickets",
+          tickets |> Js.Array.filter(item => item != ticketId),
+        );
+      });
+    })
+  ))
   |> Js.Promise.then_(result => {
       Result.make(
         ~statusCode=200,
         ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Js.Json.stringify(result),
+        ~body=Js.Json.stringifyAny(result) |> Js.Option.getExn,
         ()
       )
       |> Js.Promise.resolve;

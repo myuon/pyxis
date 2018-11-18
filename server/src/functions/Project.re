@@ -100,14 +100,22 @@ let remove = (event, _context) => {
     |> Js.Dict.get(_, "projectId")
     |> Js.Option.getExn;
 
-  DB.Project.delete(projectId)
+  Js.Promise.all2((
+    DB.Project.delete(projectId),
+    DB.Project.get(projectId)
+    |> Js.Promise.then_((result : DB.QueryResult.one(DB.Project.t)) => {
+      result.item##tickets
+      |> Belt.Array.map(_, DB.Ticket.delete)
+      |> Js.Promise.all
+    })
+  ))
   |> Js.Promise.then_(result => {
-      Result.make(
-        ~statusCode=200,
-        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Js.Json.stringify(result),
-        ()
-      )
-      |> Js.Promise.resolve;
+    Result.make(
+      ~statusCode=200,
+      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+      ~body=Js.Json.stringifyAny(result) |> Js.Option.getExn,
+      ()
+    )
+    |> Js.Promise.resolve;
   });
 };

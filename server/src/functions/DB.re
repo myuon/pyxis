@@ -66,6 +66,7 @@ module Project = {
     DAO.create({
       "id": {j|project-$id|j},
       "sort": "detail",
+      "tickets": [||],
       "title": json##title,
       "owned_by": json##owned_by,
     });

@@ -68,6 +68,47 @@ module DAO = {
     |> promise;
   };
 
+  let listByOwner : (~owner: string, ~kind: string, ~sort: string = ?, unit) => Js.Promise.t(Js.Json.t) = (~owner, ~kind, ~sort=?, ()) => {
+    switch sort {
+      | None => {
+        "TableName": "entities",
+        "IndexName": "owners",
+        "KeyConditionExpression": "owned_by = :owned_by and begins_with(id, :id)",
+        "ExpressionAttributeValues": {
+          ":owned_by": owner,
+          ":id": kind,
+        }
+      } |> encode
+      | Some(sort) => {
+        "TableName": "entities",
+        "IndexName": "owners",
+        "KeyConditionExpression": "owned_by = :owned_by and begins_with(id, :id)",
+        "FilterExpression": "sort = :sort",
+        "ExpressionAttributeValues": {
+          ":owned_by": owner,
+          ":id": kind,
+          ":sort": sort
+        }
+      } |> encode
+    }
+    |> query(dbc,_)
+    |> promise;
+  };
+
+  let list = (~id: string, ~sort: string) => {
+    {
+      "TableName": "entities",
+      "KeyConditionExpression": "id = :id and begins_with(sort, :sort)",
+      "ExpressionAttributeValues": {
+        ":id": id,
+        ":sort": sort,
+      }
+    }
+    |> encode
+    |> query(dbc,_)
+    |> promise
+  };
+
   let get : (~id: string, ~sort: string) => Js.Promise.t(Js.Json.t) = (~id, ~sort) => {
     {
       "TableName": "entities",
@@ -122,19 +163,11 @@ module Project = {
   external encode : 't => Js.Json.t = "%identity";
 
   let list = (userId) => {
-    Json.Encode.(
-      object_([
-        ("TableName", string("entities")),
-        ("IndexName", string("owners")),
-        ("KeyConditionExpression", string("owned_by = :owner and begins_with(id, :id)")),
-        ("ExpressionAttributeValues", object_([
-          (":owner", string(userId)),
-          (":id", string("project")),
-        ]))
-      ])
+    DAO.listByOwner(
+      ~owner=userId,
+      ~kind="project",
+      ()
     )
-    |> query(dbc,_)
-    |> promise
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseMany(parse)
@@ -252,20 +285,12 @@ module Ticket = {
   };
 
   let list = (userId) => {
-    {
-      "TableName": "entities",
-      "IndexName": "owners",
-      "KeyConditionExpression": "owned_by = :owned_by and begins_with(id, :id)",
-      "FilterExpression": "sort = :sort",
-      "ExpressionAttributeValues": {
-        ":owned_by": userId,
-        ":id": "ticket",
-        ":sort": "detail",
-      }
-    }
-    |> encode
-    |> query(dbc,_)
-    |> promise
+    DAO.listByOwner(
+      ~owner=userId,
+      ~kind="ticket",
+      ~sort="detail",
+      ()
+    )
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseMany(parse)
@@ -365,17 +390,10 @@ module Page = {
   external encode : 'a => Js.Json.t = "%identity";
 
   let list = (ticketId) => {
-    {
-      "TableName": "entities",
-      "KeyConditionExpression": "id = :id and begins_with(sort, :sort)",
-      "ExpressionAttributeValues": {
-        ":id": {j|ticket-$ticketId|j},
-        ":sort": "page",
-      }
-    }
-    |> encode
-    |> query(dbc,_)
-    |> promise
+    DAO.list(
+      ~id={j|ticket-$ticketId|j},
+      ~sort="page",
+    )
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseMany(parse)
@@ -446,17 +464,10 @@ module Comment = {
   external encode : 'a => Js.Json.t = "%identity";
 
   let list = (ticketId) => {
-    {
-      "TableName": "entities",
-      "KeyConditionExpression": "id = :id and begins_with(sort, :sort)",
-      "ExpressionAttributeValues": {
-        ":id": {j|ticket-$ticketId|j},
-        ":sort": "comment",
-      },
-    }
-    |> encode
-    |> query(dbc,_)
-    |> promise
+    DAO.list(
+      ~id={j|ticket-$ticketId|j},
+      ~sort="comment",
+    )
     |> Js.Promise.then_(result => {
       result
       |> QueryResult.parseMany(parse)

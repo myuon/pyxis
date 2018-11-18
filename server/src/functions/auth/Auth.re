@@ -40,6 +40,7 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, Js.Json.t) => unit) => 
       |> Js.Dict.get(_, "authorizationToken")
       |> Js.Option.andThen((. v) => Js.Json.decodeString(v))
       |> Js.Option.map((. v) => v |> Js.String.split("Bearer ") |> x => x[1]);
+
     let methodArn = event
       |> Js.Dict.get(_, "methodArn")
       |> Js.Option.andThen((. v) => Js.Json.decodeString(v))
@@ -53,13 +54,15 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, Js.Json.t) => unit) => 
       ))
     };
 
-    let decoded : payload = jwtVerify(
+    let decoded : payload = try (jwtVerify(
       token,
       Node.Process.process##env |> Js.Dict.unsafeGet(_, "jwt_public"),
       {
         "algorithms": [| "RS256" |]
       } |> encode
-    );
+    )) {
+      | Js.Exn.Error(_) => raise(Return("Unauthorized" |> Js.Json.string, generatePolicy("user", "Deny", methodArn, Js.null)))
+    };
 
     /* skip user scope check now */
     let isAllowed = true;

@@ -62,6 +62,10 @@ export default {
   },
   mounted: async function () {
     this.user = await client.user.me();
+
+    if (this.user.statusCode === 401) {
+      this.$router.push('/signIn');
+    }
   },
   methods: {
     signOut: async function () {

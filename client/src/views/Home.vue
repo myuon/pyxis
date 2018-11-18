@@ -116,7 +116,6 @@ export default {
         title: this.projectForm.title,
         owned_by: "1",
       });
-      console.log(res);
       await this.loadRecentProjects();
       this.newProjectDialog = false;
 
@@ -128,7 +127,6 @@ export default {
     },
     loadRecentProjects: async function() {
       this.recent = await client.project.listRecent();
-      console.log(this.recent);
     },
     createTicket: async function() {
       const res = await client.ticket.create({

@@ -52,6 +52,23 @@ module QueryResult = {
   };
 };
 
+module DAO = {  
+  module DBC = {
+  };
+
+  external encode : 'a => Js.Json.t = "%identity";
+
+  let create : Js.t('a) => Js.Promise.t(Js.Json.t) = (item) => {
+    {
+      "TableName": "entities",
+      "Item": item |> encode,
+    }
+    |> encode
+    |> put(dbc,_)
+    |> promise;
+  };
+};
+
 module Project = {
   type t = Js.t({
     .
@@ -99,18 +116,12 @@ module Project = {
   let create : Js.t({. owned_by: string, title: string}) => Js.Promise.t(Js.Json.t) = (json) => {
     let id = UUID.uuid();
 
-    {
-      "TableName": "entities",
-      "Item": {
-        "id": {j|project-$id|j},
-        "sort": "detail",
-        "title": json##title,
-        "owned_by": json##owned_by,
-      }
-    }
-    |> encode
-    |> put(dbc,_)
-    |> promise;
+    DAO.create({
+      "id": {j|project-$id|j},
+      "sort": "detail",
+      "title": json##title,
+      "owned_by": json##owned_by,
+    });
   };
 
   let delete = (projectId) => {
@@ -194,23 +205,17 @@ module Ticket = {
   }) => Js.Promise.t(string) = (json) => {
     let id = UUID.uuid();
 
-    {
-      "TableName": "entities",
-      "Item": {
-        "id": {j|ticket-$id|j},
-        "sort": "detail",
-        "title": json##title,
-        "comment": 0,
-        "assigned_to": json##assigned_to,
-        "belongs_to": {
-          "project": json##belongs_to##project,
-        },
-        "owned_by": json##owned_by,
-      }
-    }
-    |> encode
-    |> put(dbc,_)
-    |> promise
+    DAO.create({
+      "id": {j|ticket-$id|j},
+      "sort": "detail",
+      "title": json##title,
+      "comment": 0,
+      "assigned_to": json##assigned_to,
+      "belongs_to": {
+        "project": json##belongs_to##project,
+      },
+      "owned_by": json##owned_by,
+    })
     |> Js.Promise.then_(_ => {
       id
       |> Js.Promise.resolve;
@@ -377,22 +382,16 @@ module Page = {
     let ticketId = json##belongs_to##ticket;
     let pageId = json##id;
 
-    {
-      "TableName": "entities",
-      "Item": {
-        "id": {j|ticket-$ticketId|j},
-        "sort": {j|page-$pageId|j},
-        "title": json##title,
-        "content": if (json##content != "") { json##content } else { [%raw {| null |}] },
-        "belongs_to": {
-          "project": json##belongs_to##project,
-        },
-        "owned_by": json##owned_by,
-      }
-    }
-    |> encode
-    |> put(dbc,_)
-    |> promise;
+    DAO.create({
+      "id": {j|ticket-$ticketId|j},
+      "sort": {j|page-$pageId|j},
+      "title": json##title,
+      "content": if (json##content != "") { json##content } else { [%raw {| null |}] },
+      "belongs_to": {
+        "project": json##belongs_to##project,
+      },
+      "owned_by": json##owned_by,
+    });
   };
 };
 
@@ -461,21 +460,14 @@ module Comment = {
   }) => Js.Promise.t(Js.Json.t) = (commentId, item) => {
     let ticketId = item##belongs_to##ticket;
 
-    {
-      "TableName": "entities",
-      "Item": [%bs.obj {
-        id: {j|ticket-$ticketId|j},
-        sort: {j|comment-$commentId|j},
-        content: item##content,
-        belongs_to: item##belongs_to,
-        created_at: Js.Date.make() |> Js.Date.toISOString,
-        owned_by: item##owned_by,
-      }]
-      |> (encode : t => Js.Json.t)
-    }
-    |> encode
-    |> put(dbc,_)
-    |> promise;
+    DAO.create({
+      "id": {j|ticket-$ticketId|j},
+      "sort": {j|comment-$commentId|j},
+      "content": item##content,
+      "belongs_to": item##belongs_to,
+      "created_at": Js.Date.make() |> Js.Date.toISOString,
+      "owned_by": item##owned_by,
+    });
   };
 };
 
@@ -568,35 +560,23 @@ module User = {
   };
 
   let createIdp = (idp, idpId, userId) => {
-    {
-      "TableName": "entities",
-      "Item": {
-        "id": {j|idp-$idp-$idpId|j},
-        "sort": "detail",
-        "owned_by": userId
-      }
-    }
-    |> encode
-    |> put(dbc,_)
-    |> promise;
+    DAO.create({
+      "id": {j|idp-$idp-$idpId|j},
+      "sort": "detail",
+      "owned_by": userId
+    });
   };
 
   let create = (idp, userName) => {
     let userId = UUID.uuid();
-
-    {
-      "TableName": "entities",
-      "Item": {
-        "id": {j|user-$userId|j},
-        "sort": "detail",
-        "idp": idp,
-        "created_at": Js.Date.make() |> Js.Date.toISOString,
-        "user_name": userName,
-      }
-    }
-    |> encode
-    |> put(dbc,_)
-    |> promise
+    
+    DAO.create({
+      "id": {j|user-$userId|j},
+      "sort": "detail",
+      "idp": idp,
+      "created_at": Js.Date.make() |> Js.Date.toISOString,
+      "user_name": userName,
+    })
     |> Js.Promise.then_(_ => {
       userId
       |> Js.Promise.resolve;
@@ -604,15 +584,9 @@ module User = {
   };
 
   let createUsername = (userId, userName) => {
-    {
-      "TableName": "users",
-      "Item": {
-        "user_name": userName,
-        "id": userId,
-      }
-    }
-    |> encode
-    |> put(dbc,_)
-    |> promise;
+    DAO.create({
+      "user_name": userName,
+      "id": userId,
+    });
   };
 };

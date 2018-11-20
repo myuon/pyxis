@@ -48,8 +48,12 @@ functions:
           path: /auth/signUp
           method: post
 
-  hello:
-    handler: src/functions/echo.handler
+  userNameUsed:
+    handler: src/functions/auth/Auth.bs.userNameAvailable
+    events:
+      - http:
+          path: /auth/user_name/is_available/{user_name}
+          method: get
 
   listRecentProjects:
     handler: src/functions/Project.bs.listRecent

@@ -113,6 +113,36 @@ let idpVerify : (string) => Js.Promise.t(string) = token => {
   });
 };
 
+let userNameAvailable = (event, _context) => {
+  open AwsLambda.APIGatewayProxy;
+  open AwsLambda.APIGatewayProxy.Event;
+
+  let userName : string = event
+    |> pathParametersGet
+    |> Js.Option.getExn
+    |> Js.Dict.unsafeGet(_, "user_name");
+
+  DB.User.getByName(userName)
+  |> Js.Promise.then_(result => {
+    Js.log(result);
+    Js.log(result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item"));
+
+    Result.make(
+      ~statusCode=200,
+      ~headers=Js.Dict.fromArray([|
+        ("Access-Control-Allow-Origin", Js.Json.string("*")),
+      |]),
+      ~body=if (result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isNone) {
+        "true"
+      } else {
+        "false"
+      },
+      ()
+    )
+    |> Js.Promise.resolve;
+  });
+};
+
 let signUp = (event, _context) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
@@ -126,7 +156,15 @@ let signUp = (event, _context) => {
     |> Js.Option.getExn
     |> Js.Json.parseExn
     |> decode;
-  
+
+  DB.User.getByName(body##user_name)
+  |> Js.Promise.then_(result => {
+    Js.log(result);
+
+    result |> Js.Promise.resolve;
+  });
+
+  /*
   idpVerify(body##token)
   |> Js.Promise.then_(idpId => {
     DB.User.create(
@@ -151,6 +189,7 @@ let signUp = (event, _context) => {
       });
     });
   });
+  */
 };
 
 let signIn = (event, _context) => {

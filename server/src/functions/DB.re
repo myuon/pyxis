@@ -489,4 +489,16 @@ module User = {
       |> Js.Promise.resolve;
     });
   };
+
+  let getByName = (userName) => {
+    {
+      "TableName": "userId",
+      "Key": {
+        "user_name": userName,
+      },
+    }
+    |> encode
+    |> DAO.DBC.get(DAO.DBC.dbc,_)
+    |> DAO.DBC.promise;
+  };
 };

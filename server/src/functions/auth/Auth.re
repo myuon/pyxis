@@ -159,9 +159,14 @@ let signUp = (event, _context) => {
 
   idpVerify(body##token)
   |> Js.Promise.then_(idpId => {
-    DB.User.getByName(body##user_name)
-    |> Js.Promise.then_(result => {
-      if (result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isSome) {
+    Js.Promise.all2((
+      DB.User.getByName(body##user_name),
+      DB.User.findViaIdp("google", idpId)
+      |> Js.Promise.then_(_ => true |> Js.Promise.resolve)
+      |> Js.Promise.catch(_ => false |> Js.Promise.resolve),
+    ))
+    |> Js.Promise.then_(((result_name, result_idp)) => {
+      if (result_name |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isSome || result_idp) {
         Result.make(
           ~statusCode=400,
           ~headers=Js.Dict.fromArray([|

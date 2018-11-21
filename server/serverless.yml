@@ -48,7 +48,7 @@ functions:
           path: /auth/signUp
           method: post
 
-  userNameUsed:
+  userNameAvailable:
     handler: src/functions/auth/Auth.bs.userNameAvailable
     events:
       - http:

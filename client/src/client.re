@@ -59,6 +59,8 @@ let client : {
   "auth": {
     .
     "signIn": {. "token": string} => Js.Promise.t({. "token": string }),
+    "signUp": {. "user_name": string, "token": string} => Js.Promise.t(Js.Json.t),
+    "userNameAvailable": (string) => Js.Promise.t(bool),
   },
   "user": {
     .
@@ -160,7 +162,9 @@ let client : {
         result
         |> Js.Promise.resolve;
       })
-    }
+    },
+    "signUp": (json) => post("/auth/signUp", json |> encode),
+    "userNameAvailable": (userName) => get({j|/auth/user_name/is_available/$userName|j}),
   },
   "user": {
     "me": () => get("/users/me"),

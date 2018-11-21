@@ -157,39 +157,45 @@ let signUp = (event, _context) => {
     |> Js.Json.parseExn
     |> decode;
 
-  DB.User.getByName(body##user_name)
-  |> Js.Promise.then_(result => {
-    Js.log(result);
-
-    result |> Js.Promise.resolve;
-  });
-
-  /*
   idpVerify(body##token)
   |> Js.Promise.then_(idpId => {
-    DB.User.create(
-      {
-        "google": idpId,
-      },
-      body##user_name,
-    )
-    |> Js.Promise.then_(userId => {
-      Js.Promise.all([|
-        DB.User.createIdp("google", idpId, userId),
-        DB.User.createUsername(userId, body##user_name),
-      |])
-      |> Js.Promise.then_(_ => {
+    DB.User.getByName(body##user_name)
+    |> Js.Promise.then_(result => {
+      if (result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isSome) {
         Result.make(
-          ~statusCode=200,
-          ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-          ~body="{}",
+          ~statusCode=400,
+          ~headers=Js.Dict.fromArray([|
+            ("Access-Control-Allow-Origin", Js.Json.string("*")),
+          |]),
+          ~body="Validation Error",
           ()
         )
         |> Js.Promise.resolve;
-      });
+      } else {
+        DB.User.create(
+          {
+            "google": idpId,
+          },
+          body##user_name,
+        )
+        |> Js.Promise.then_(userId => {
+          Js.Promise.all([|
+            DB.User.createIdp("google", idpId, userId),
+            DB.User.createNameAlias(body##user_name, userId),
+          |])
+          |> Js.Promise.then_(_ => {
+            Result.make(
+              ~statusCode=200,
+              ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+              ~body="{\"result\": true}",
+              ()
+            )
+            |> Js.Promise.resolve;
+          });
+        });
+      }
     });
   });
-  */
 };
 
 let signIn = (event, _context) => {

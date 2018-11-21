@@ -13,14 +13,23 @@
           </g-signin-button>
         </el-tab-pane>
         <el-tab-pane label="Sign Up" name="signUp">
-          <g-signin-button
-            :params="googleSignInParams"
-            @success="onSignUpSuccess"
-            @error="onSignUpError">
-            <el-button type="primary">
-              Sign up with Google
-            </el-button>
-          </g-signin-button>
+          <el-form ref="form" :rules="formRules" :model="form" label-width="100px" status-icon>
+            <el-form-item label="User Name" prop="user_name">
+              <el-input size="small" v-model="form.user_name" autocomplete="off">
+                <template slot="prepend">@</template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <g-signin-button
+                :params="googleSignInParams"
+                @success="onSignUpSuccess"
+                @error="onSignUpError">
+                <el-button type="primary">
+                  Sign up with Google
+                </el-button>
+              </g-signin-button>
+            </el-form-item>
+          </el-form>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -36,22 +45,45 @@ export default {
   components: {
   },
   data () {
+    const checkIsAvailable = async (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('Please input the user name'));
+      } else {
+        const result = await client.auth.userNameAvailable(this.form.user_name);
+
+        if (!result) {
+          callback(new Error('This user name is not available'));
+        }
+
+        callback();
+      }
+    };
+
     return {
       activeTab: 'signIn',
       authConfig: {},
       googleSignInParams: {
         client_id: token.web.client_id,
       },
+      form: {
+        user_name: ''
+      },
+      formRules: {
+        user_name: [
+          { validator: checkIsAvailable, trigger: 'change' }
+        ]
+      },
     };
   },
   methods: {
-    onSignUpSuccess (googleUser) {
-      client.auth.signIn({
-        userName: 'myuon',
-        email: 'ioi.joi.koi.loi@gmail.com',
-        idp: 'google',
+    onSignUpSuccess: async function (googleUser) {
+      const result = await client.auth.signUp({
+        user_name: this.form.user_name,
         token: googleUser.getAuthResponse().id_token,
       });
+      if (result.result === true) {
+        await this.onSignInSuccess(googleUser);
+      }
     },
     onSignUpError (error) {
       console.log(error);
@@ -75,7 +107,7 @@ export default {
   top: 30px;
   left: 0;
   right: 0;
-  width: 460px;
+  width: 480px;
   margin: auto;
 }
 </style>

@@ -471,13 +471,6 @@ module User = {
     });
   };
 
-  let createUsername = (userId, userName) => {
-    DAO.create({
-      "user_name": userName,
-      "id": userId,
-    });
-  };
-
   let get = (userId) => {
     DAO.get(
       ~id={j|user-$userId|j},
@@ -499,6 +492,19 @@ module User = {
     }
     |> encode
     |> DAO.DBC.get(DAO.DBC.dbc,_)
+    |> DAO.DBC.promise;
+  };
+
+  let createNameAlias = (userName, userId) => {
+    {
+      "TableName": "userId",
+      "Item": {
+        "user_name": userName,
+        "id": userId,
+      },
+    }
+    |> encode
+    |> DAO.DBC.put(DAO.DBC.dbc,_)
     |> DAO.DBC.promise;
   };
 };

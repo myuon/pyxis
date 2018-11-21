@@ -13,7 +13,7 @@ type t = Js.t({
 external encode : t => Js.Json.t = "%identity";
 external decode : Js.Json.t => 'a = "%identity";
 
-let listRecent = (event, _context) => {
+let listRecent = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
 
   let userId = event
@@ -68,7 +68,7 @@ let listRecent = (event, _context) => {
   })
 };
 
-let create = (event, _context) => {
+let create = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 
@@ -94,7 +94,7 @@ let create = (event, _context) => {
   });
 };
 
-let remove = (event, _context) => {
+let remove = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 

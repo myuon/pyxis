@@ -1,4 +1,4 @@
-let endpoint = [%bs.raw {| process.env.NODE_ENV === 'production' ? "http://localhost:3000" : "https://k1dt1bsvp1.execute-api.ap-northeast-1.amazonaws.com/dev/" |}];
+let endpoint = [%bs.raw {| process.env.NODE_ENV === 'production' ? "http://localhost:3000" : "https://k1dt1bsvp1.execute-api.ap-northeast-1.amazonaws.com/dev" |}];
 external decode : Js.Json.t => 'a = "%identity";
 external encode : 'a => Js.Json.t = "%identity";
 
@@ -10,8 +10,12 @@ let get = (api) => {
     {j|$endpoint$api|j},
     Fetch.RequestInit.make(
       ~method_=Get,
-      ~headers=Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}}),
-      ~credentials=Include,
+      ~headers=if (token |> Js.Option.isNone) {
+        Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}})
+      } else {
+        Fetch.HeadersInit.makeWithArray([||])
+      },
+      ~credentials=SameOrigin,
       ()
     )
   )
@@ -27,8 +31,12 @@ let delete = (api) => {
     {j|$endpoint$api|j},
     Fetch.RequestInit.make(
       ~method_=Delete,
-      ~headers=Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}}),
-      ~credentials=Include,
+      ~headers=if (token |> Js.Option.isNone) {
+        Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}})
+      } else {
+        Fetch.HeadersInit.makeWithArray([||])
+      },
+      ~credentials=SameOrigin,
       ()
     )
   )
@@ -45,8 +53,12 @@ let post = (api, body) => {
     Fetch.RequestInit.make(
       ~method_=Post,
       ~body=Fetch.BodyInit.make(Js.Json.stringify(body)),
-      ~headers=Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}}),
-      ~credentials=Include,
+      ~headers=if (token |> Js.Option.isNone) {
+        Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}})
+      } else {
+        Fetch.HeadersInit.makeWithArray([||])
+      },
+      ~credentials=SameOrigin,
       ()
     )
   )

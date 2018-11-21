@@ -1,6 +1,6 @@
 external decode : Js.Json.t => 'a = "%identity";
 
-let create = (event, _context) => {
+let create = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
 
   let input : {
@@ -75,7 +75,7 @@ let parse : DB.Comment.t => t = json => {
 };
 external encode : t => Js.Json.t = "%identity";
 
-let list = (event, _context) => {
+let list = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
 
   let ticketId = event

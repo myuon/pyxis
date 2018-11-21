@@ -14,7 +14,7 @@ external parse : DB.Ticket.t => t = "%identity";
 external decode : Js.Json.t => 'a = "%identity";
 external encode : t => Js.Json.t = "%identity";
 
-let get = (event, _context) => {
+let get = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 
@@ -47,7 +47,7 @@ let get = (event, _context) => {
   })
 };
 
-let create = (event, _context) => {
+let create = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 
@@ -104,7 +104,7 @@ let create = (event, _context) => {
   });
 };
 
-let remove = (event, _context) => {
+let remove = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 

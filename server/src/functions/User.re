@@ -19,7 +19,7 @@ let convert : DB.User.t => t = json => [%bs.obj {
   },
 }];
 
-let getMe = (event, _context) => {
+let getMe = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
   open AwsLambda.APIGatewayProxy.EventRequestContext;

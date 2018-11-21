@@ -6,7 +6,7 @@ type t = Js.t({
   belongs_to: Js.Dict.t(string),
 });
 
-let get = (event, _context) => {
+let get = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 

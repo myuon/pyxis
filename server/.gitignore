@@ -8,3 +8,4 @@ jspm_packages
 lib/
 *.bs.js
 .merlin
+*.js

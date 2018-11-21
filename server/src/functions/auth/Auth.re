@@ -113,7 +113,7 @@ let idpVerify : (string) => Js.Promise.t(string) = token => {
   });
 };
 
-let userNameAvailable = (event, _context) => {
+let userNameAvailable = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 
@@ -131,6 +131,7 @@ let userNameAvailable = (event, _context) => {
       ~statusCode=200,
       ~headers=Js.Dict.fromArray([|
         ("Access-Control-Allow-Origin", Js.Json.string("*")),
+        ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
       |]),
       ~body=if (result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isNone) {
         "true"
@@ -143,7 +144,7 @@ let userNameAvailable = (event, _context) => {
   });
 };
 
-let signUp = (event, _context) => {
+let signUp = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 
@@ -171,6 +172,7 @@ let signUp = (event, _context) => {
           ~statusCode=400,
           ~headers=Js.Dict.fromArray([|
             ("Access-Control-Allow-Origin", Js.Json.string("*")),
+            ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
           |]),
           ~body="Validation Error",
           ()
@@ -191,7 +193,10 @@ let signUp = (event, _context) => {
           |> Js.Promise.then_(_ => {
             Result.make(
               ~statusCode=200,
-              ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
+              ~headers=Js.Dict.fromArray([|
+                ("Access-Control-Allow-Origin", Js.Json.string("*")),
+                ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
+              |]),
               ~body="{\"result\": true}",
               ()
             )
@@ -203,7 +208,7 @@ let signUp = (event, _context) => {
   });
 };
 
-let signIn = (event, _context) => {
+let signIn = (event, _context, _cb) => {
   open AwsLambda.APIGatewayProxy;
   open AwsLambda.APIGatewayProxy.Event;
 

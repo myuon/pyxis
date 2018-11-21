@@ -23,105 +23,121 @@ provider:
     jwt_private: ${file(../token/jwtES256.key)}
     google_clientid: ${file(../token/google.json):web.client_id}
 
+package:
+  exclude:
+    - src/**/*.re
+
 functions:
   authorizer:
-    handler: src/functions/auth/Auth.bs.authorize
+    handler: src/functions/auth/Auth.authorize
 
   signIn:
-    handler: src/functions/auth/Auth.bs.signIn
+    handler: src/functions/auth/Auth.signIn
     events:
       - http:
           path: /auth/signIn
           method: post
+          cors: true
 
   signUp:
-    handler: src/functions/auth/Auth.bs.signUp
+    handler: src/functions/auth/Auth.signUp
     events:
       - http:
           path: /auth/signUp
           method: post
+          cors: true
 
   userNameAvailable:
-    handler: src/functions/auth/Auth.bs.userNameAvailable
+    handler: src/functions/auth/Auth.userNameAvailable
     events:
       - http:
           path: /auth/user_name/is_available/{user_name}
           method: get
+          cors: true
 
   listRecentProjects:
-    handler: src/functions/Project.bs.listRecent
+    handler: src/functions/Project.listRecent
     events:
       - http:
           path: /projects/recent
           method: get
           authorizer: authorizer
+          cors: true
 
   createProject:
-    handler: src/functions/Project.bs.create
+    handler: src/functions/Project.create
     events:
       - http:
           path: /projects/
           method: post
           authorizer: authorizer
+          cors: true
 
   removeProject:
-    handler: src/functions/Project.bs.remove
+    handler: src/functions/Project.remove
     events:
       - http:
           path: /projects/{projectId}
           method: delete
           authorizer: authorizer
+          cors: true
 
   createTicket:
-    handler: src/functions/Ticket.bs.create
+    handler: src/functions/Ticket.create
     events:
       - http:
           path: /tickets/
           method: post
           authorizer: authorizer
+          cors: true
 
   getTicket:
-    handler: src/functions/Ticket.bs.get
+    handler: src/functions/Ticket.get
     events:
       - http:
           path: /tickets/{ticketId}
           method: get
           authorizer: authorizer
+          cors: true
 
   removeTicket:
-    handler: src/functions/Ticket.bs.remove
+    handler: src/functions/Ticket.remove
     events:
       - http:
           path: /tickets/{ticketId}
           method: delete
           authorizer: authorizer
+          cors: true
 
   listPages:
-    handler: src/functions/Page.bs.get
+    handler: src/functions/Page.get
     events:
       - http:
           path: /tickets/{ticketId}/pages
           method: get
           authorizer: authorizer
+          cors: true
 
   createComment:
-    handler: src/functions/Comment.bs.create
+    handler: src/functions/Comment.create
     events:
       - http:
           path: /comments
           method: post
           authorizer: authorizer
+          cors: true
 
   listComments:
-    handler: src/functions/Comment.bs.list
+    handler: src/functions/Comment.list
     events:
       - http:
           path: /tickets/{ticketId}/comments
           method: get
           authorizer: authorizer
+          cors: true
 
   getMe:
-    handler: src/functions/User.bs.getMe
+    handler: src/functions/User.getMe
     events:
       - http:
           path: /users/me
@@ -181,6 +197,25 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+    GatewayResponseDefault5XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
 
 custom:
   dynamodb:

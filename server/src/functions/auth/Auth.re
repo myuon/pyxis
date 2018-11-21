@@ -58,7 +58,7 @@ let authorize : (Js.Dict.t(Js.Json.t), 'a, (. Js.Json.t, Js.Json.t) => unit) => 
       token,
       Node.Process.process##env |> Js.Dict.unsafeGet(_, "jwt_public"),
       {
-        "algorithms": [| "RS256" |]
+        "algorithms": [| "ES256" |]
       } |> encode
     )) {
       | Js.Exn.Error(_) => raise(Return("Unauthorized" |> Js.Json.string, generatePolicy("user", "Deny", methodArn, Js.null)))
@@ -232,7 +232,7 @@ let signIn = (event, _context) => {
           }] |> encode,
           Node.Process.process##env |> Js.Dict.unsafeGet(_, "jwt_private"),
           [%bs.obj {
-            algorithm: "RS256",
+            algorithm: "ES256",
           }] |> encode
         );
 

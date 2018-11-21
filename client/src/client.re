@@ -1,4 +1,4 @@
-let endpoint = [%bs.raw {| process.env.NODE_ENV === 'production' ? "http://localhost:3000" : "https://k1dt1bsvp1.execute-api.ap-northeast-1.amazonaws.com/dev" |}];
+let endpoint = [%bs.raw {| process.env.NODE_ENV === 'production' ? "https://k1dt1bsvp1.execute-api.ap-northeast-1.amazonaws.com/dev" : "http://localhost:3000" |}];
 external decode : Js.Json.t => 'a = "%identity";
 external encode : 'a => Js.Json.t = "%identity";
 

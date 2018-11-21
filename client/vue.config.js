@@ -1,3 +1,3 @@
 module.exports = {
-  baseUrl: "/pyxis-web/"
+  baseUrl: "/pyxis/"
 }

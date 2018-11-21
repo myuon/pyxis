@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "watch": "bsb -make-world -w",
-    "deploy": "yarn build && mv dist ../docs"
+    "deploy": "yarn build && rm -rf ../docs && mv dist ../docs"
   },
   "dependencies": {
     "@justgage/reason-cookie": "^0.1.2",

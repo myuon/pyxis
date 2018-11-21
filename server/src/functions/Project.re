@@ -1,5 +1,3 @@
-let me = "1";
-
 type t = Js.t({
   .
   id: string,
@@ -15,14 +13,20 @@ type t = Js.t({
 external encode : t => Js.Json.t = "%identity";
 external decode : Js.Json.t => 'a = "%identity";
 
-let listRecent = (_event, _context) => {
+let listRecent = (event, _context) => {
   open AwsLambda.APIGatewayProxy;
 
-  DB.Project.list(me)
+  let userId = event
+    |> AwsLambda.APIGatewayProxy.Event.requestContextGet
+    |> AwsLambda.APIGatewayProxy.EventRequestContext.authorizerGet |> Js.Option.getExn
+    |> Js.Dict.unsafeGet(_, "userId")
+    |> Js.Json.decodeString |> Js.Option.getExn;
+
+  DB.Project.list(userId)
   |> Js.Promise.then_((result : DB.QueryResult.many(DB.Project.t)) => {
     let projects = result.items;
 
-    DB.Ticket.list(me)
+    DB.Ticket.list(userId)
     |> Js.Promise.then_((result : DB.QueryResult.many(DB.Ticket.t)) => {
       let tickets = result.items;
 

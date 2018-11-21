@@ -1,5 +1,3 @@
-let me = "1";
-
 type t = Js.t({
   .
   id: string,

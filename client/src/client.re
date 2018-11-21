@@ -10,7 +10,7 @@ let get = (api) => {
     {j|$endpoint$api|j},
     Fetch.RequestInit.make(
       ~method_=Get,
-      ~headers=if (token |> Js.Option.isNone) {
+      ~headers=if (token |> Js.Option.isNone || token == Some("undefined")) {
         Fetch.HeadersInit.makeWithArray([||])
       } else {
         Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}})
@@ -31,7 +31,7 @@ let delete = (api) => {
     {j|$endpoint$api|j},
     Fetch.RequestInit.make(
       ~method_=Delete,
-      ~headers=if (token |> Js.Option.isNone) {
+      ~headers=if (token |> Js.Option.isNone || token == Some("undefined")) {
         Fetch.HeadersInit.makeWithArray([||])
       } else {
         Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}})
@@ -53,7 +53,7 @@ let post = (api, body) => {
     Fetch.RequestInit.make(
       ~method_=Post,
       ~body=Fetch.BodyInit.make(Js.Json.stringify(body)),
-      ~headers=if (token |> Js.Option.isNone) {
+      ~headers=if (token |> Js.Option.isNone || token == Some("undefined")) {
         Fetch.HeadersInit.makeWithArray([||])
       } else {
         Fetch.HeadersInit.make({"Authorization": {j|Bearer $token|j}})

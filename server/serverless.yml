@@ -10,7 +10,7 @@ provider:
   runtime: nodejs8.10
   memorySize: 128
   stage: ${opt:stage, 'dev'}
-  region: us-east-1
+  region: ap-northeast-1
   tracing: true
   iamRoleStatements:
     - Effect: Allow
@@ -22,13 +22,6 @@ provider:
     jwt_public: ${file(../token/jwtES256.key.pub)}
     jwt_private: ${file(../token/jwtES256.key)}
     google_clientid: ${file(../token/google.json):web.client_id}
-
-package:
-  exclude:
-    - ./**
-  include:
-    - src/**
-    - node_modules/**
 
 functions:
   authorizer:

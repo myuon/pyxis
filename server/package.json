@@ -13,6 +13,7 @@
     "@glennsl/bs-json": "^3.0.0",
     "aws-xray-sdk": "^2.0.0",
     "google-auth-library": "^2.0.1",
+    "jsonwebtoken": "^8.4.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

@@ -26,6 +26,8 @@ provider:
 package:
   exclude:
     - src/**/*.re
+  include:
+    - node_modules/bs-platform/**/*.js
 
 functions:
   authorizer:

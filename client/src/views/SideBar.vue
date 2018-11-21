@@ -63,7 +63,7 @@ export default {
   mounted: async function () {
     this.user = await client.user.me();
 
-    if (this.user.statusCode === 401) {
+    if (this.user.message === 'Unauthorized') {
       this.$router.push('/signIn');
     }
   },

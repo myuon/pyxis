@@ -1,6 +1,7 @@
 service: pyxis
 
 plugins:
+  - serverless-webpack
   - serverless-plugin-tracing
   - serverless-dynamodb-local
   - serverless-offline
@@ -17,17 +18,12 @@ provider:
       Action:
         - xray:PutTraceSegments
         - xray:PutTelemetryRecords
+        - dynamodb:*
       Resource: "*"
   environment:
     jwt_public: ${file(../token/jwtES256.key.pub)}
     jwt_private: ${file(../token/jwtES256.key)}
     google_clientid: ${file(../token/google.json):web.client_id}
-
-package:
-  exclude:
-    - src/**/*.re
-  include:
-    - node_modules/bs-platform/**/*.js
 
 functions:
   authorizer:
@@ -233,4 +229,13 @@ custom:
             sources: [ "./migrations/entities.json" ]
           - table: userId
             sources: [ "./migrations/users.json" ]
-
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules:
+      forceInclude:
+        - aws-xray-sdk
+      forceExclude:
+        - bs-platform
+        - '@glennsl/bs-json'
+        - '@ahrefs/bs-aws-lambda'
+    packager: 'yarn'

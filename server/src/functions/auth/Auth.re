@@ -131,7 +131,6 @@ let userNameAvailable = (event, _context, _cb) => {
       ~statusCode=200,
       ~headers=Js.Dict.fromArray([|
         ("Access-Control-Allow-Origin", Js.Json.string("*")),
-        ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
       |]),
       ~body=if (result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isNone) {
         "true"

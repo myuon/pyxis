@@ -9,3 +9,5 @@ lib/
 *.bs.js
 .merlin
 *.js
+
+.webpack/

@@ -13,5 +13,6 @@
   "bs-dependencies": [
     "@ahrefs/bs-aws-lambda",
     "@glennsl/bs-json"
-  ]
+  ],
+  "refmt": 3
 }

@@ -20,9 +20,7 @@ let convert : DB.User.t => t = json => [%bs.obj {
 }];
 
 let getMe = Controller.wrapper((event) => {
-  let userId = event##requestContext
-    |> Js.Dict.unsafeGet(_, "authorizer")
-    |> Js.Json.parseExn
+  let userId = event##requestContext##authorizer
     |> RawJson.decode
     |> x => x##userId;
 

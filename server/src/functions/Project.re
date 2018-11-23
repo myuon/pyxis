@@ -14,11 +14,9 @@ external encode : t => Js.Json.t = "%identity";
 external decode : Js.Json.t => 'a = "%identity";
 
 let listRecent = Controller.wrapper((event) => {
-  let userId = event##requestContext
-    |> Js.Dict.unsafeGet(_, "authorizer")
-    |> Js.Json.parseExn
+  let userId = event##requestContext##authorizer
     |> RawJson.decode
-    |> x => x##userId
+    |> x => x##userId;
   
   DB.Project.list(userId)
   |> Js.Promise.then_((result : DB.QueryResult.many(DB.Project.t)) => {

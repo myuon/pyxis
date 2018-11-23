@@ -2,7 +2,10 @@ type event = {
   .
   "pathParameters": Js.Dict.t(string),
   "body": string,
-  "requestContext": Js.Dict.t(string),
+  "requestContext": {
+    .
+    "authorizer": Js.Json.t,
+  },
 };
 
 type response = {

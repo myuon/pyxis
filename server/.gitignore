@@ -11,3 +11,4 @@ lib/
 *.js
 
 .webpack/
+.bsb.lock

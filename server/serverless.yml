@@ -26,6 +26,14 @@ provider:
     google_clientid: ${file(../token/google.json):web.client_id}
 
 functions:
+  hello:
+    handler: src/functions/Test.handler
+    events:
+      - http:
+          path: /test/{value}
+          method: get
+          cors: true
+
   authorizer:
     handler: src/functions/auth/Auth.authorize
 

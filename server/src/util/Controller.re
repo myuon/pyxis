@@ -1,13 +1,15 @@
 type event = {
   .
   "pathParameters": Js.Dict.t(string),
+  "body": string,
+  "requestContext": Js.Dict.t(string),
 };
 
 type response = {
   .
   "statusCode": int,
   "headers": Js.Json.t,
-  "body": string
+  "body": string,
 };
 
 exception Return(int, Js.Json.t);
@@ -30,6 +32,13 @@ let wrapper : ((event) => Js.Promise.t(Js.Json.t)) =>
       result(
         ~statusCode=200,
         ~body=body,
+      )
+      |> Js.Promise.resolve;
+    })
+    |> Js.Promise.catch(error => {
+      result(
+        ~statusCode=500,
+        ~body=error |> Js.Json.stringifyAny |> RawJson.encode
       )
       |> Js.Promise.resolve;
     })

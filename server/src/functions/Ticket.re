@@ -14,43 +14,19 @@ external parse : DB.Ticket.t => t = "%identity";
 external decode : Js.Json.t => 'a = "%identity";
 external encode : t => Js.Json.t = "%identity";
 
-let get = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
-  let ticketId = event
-    |> pathParametersGet
-    |> Js.Option.getExn
-    |> Js.Dict.get(_, "ticketId")
-    |> Js.Option.getExn;
+let get = Controller.wrapper((event) => {
+  let ticketId = event##pathParameters
+    |> Js.Dict.unsafeGet(_, "ticketId");
 
   DB.Ticket.get(ticketId)
   |> Js.Promise.then_((result : DB.QueryResult.one(DB.Ticket.t)) => {
-    let result = Result.make(
-      ~statusCode=200,
-      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringify(result.item |> parse |> encode),
-      ()
-    );
+    result
+    |> RawJson.encode
+    |> Js.Promise.resolve;
+  });
+});
 
-    Js.Promise.resolve(result);
-  })
-  |> Js.Promise.catch(err => {
-    let result = Result.make(
-      ~statusCode=500,
-      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringifyAny(err) |> Js.Option.getExn,
-      ()
-    );
-
-    Js.Promise.resolve(result);
-  })
-};
-
-let create = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
+let create = Controller.wrapper((event) => {
   let input : Js.t({
     .
     title: string,
@@ -60,9 +36,7 @@ let create = (event, _context, _cb) => {
       project: string,
     }),
     owned_by: string,
-  }) = event
-    |> bodyGet
-    |> Js.Option.getExn
+  }) = event##body
     |> Js.Json.parseExn
     |> decode;
 
@@ -92,27 +66,16 @@ let create = (event, _context, _cb) => {
       }])
     ))
     |> Js.Promise.then_(result => {
-      Result.make(
-        ~statusCode=200,
-        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Js.Json.stringifyAny(result) |> Js.Option.getExn,
-        ()
-      )
+      result
+      |> RawJson.encode
       |> Js.Promise.resolve;
-    })
-    |> Js.Promise.resolve;
+    });
   });
-};
+});
 
-let remove = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
-  let ticketId = event
-    |> pathParametersGet
-    |> Js.Option.getExn
-    |> Js.Dict.get(_, "ticketId")
-    |> Js.Option.getExn;
+let remove = Controller.wrapper((event) => {
+  let ticketId = event##pathParameters
+    |> Js.Dict.unsafeGet(_, "ticketId");
 
   Js.Promise.all2((
     DB.Ticket.delete(ticketId),
@@ -132,12 +95,8 @@ let remove = (event, _context, _cb) => {
     })
   ))
   |> Js.Promise.then_(result => {
-      Result.make(
-        ~statusCode=200,
-        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Js.Json.stringifyAny(result) |> Js.Option.getExn,
-        ()
-      )
-      |> Js.Promise.resolve;
+    result
+    |> RawJson.encode
+    |> Js.Promise.resolve;
   });
-};
+});

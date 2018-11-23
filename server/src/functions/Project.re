@@ -13,15 +13,13 @@ type t = Js.t({
 external encode : t => Js.Json.t = "%identity";
 external decode : Js.Json.t => 'a = "%identity";
 
-let listRecent = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-
-  let userId = event
-    |> AwsLambda.APIGatewayProxy.Event.requestContextGet
-    |> AwsLambda.APIGatewayProxy.EventRequestContext.authorizerGet |> Js.Option.getExn
-    |> Js.Dict.unsafeGet(_, "userId")
-    |> Js.Json.decodeString |> Js.Option.getExn;
-
+let listRecent = Controller.wrapper((event) => {
+  let userId = event##requestContext
+    |> Js.Dict.unsafeGet(_, "authorizer")
+    |> Js.Json.parseExn
+    |> RawJson.decode
+    |> x => x##userId
+  
   DB.Project.list(userId)
   |> Js.Promise.then_((result : DB.QueryResult.many(DB.Project.t)) => {
     let projects = result.items;
@@ -57,52 +55,30 @@ let listRecent = (event, _context, _cb) => {
         projects
       };
 
-      Result.make(
-        ~statusCode=200,
-        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Js.Json.stringify(Js.Json.array(arr |> Belt.Map.String.valuesToArray |> Js.Array.map(encode))),
-        ()
-      )
+      arr
+      |> Belt.Map.String.valuesToArray
+      |> Js.Array.map(encode)
+      |> Js.Json.array
       |> Js.Promise.resolve;
     });
   })
-};
+});
 
-let create = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
+let create = Controller.wrapper((event) => {
   let input : Js.t({
     .
     title: string,
     owned_by: string,
-  }) = event
-    |> bodyGet
-    |> Js.Option.getExn
+  }) = event##body
     |> Js.Json.parseExn
     |> decode;
 
-  DB.Project.create(input)
-  |> Js.Promise.then_(result => {
-    Result.make(
-      ~statusCode=200,
-      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringify(result),
-      ()
-    )
-    |> Js.Promise.resolve;
-  });
-};
+  DB.Project.create(input);
+});
 
-let remove = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
-  let projectId = event
-    |> pathParametersGet
-    |> Js.Option.getExn
-    |> Js.Dict.get(_, "projectId")
-    |> Js.Option.getExn;
+let remove = Controller.wrapper((event) => {
+  let projectId = event##pathParameters
+    |> Js.Dict.unsafeGet(_, "projectId");
 
   Js.Promise.all2((
     DB.Project.delete(projectId),
@@ -113,13 +89,9 @@ let remove = (event, _context, _cb) => {
       |> Js.Promise.all
     })
   ))
-  |> Js.Promise.then_(result => {
-    Result.make(
-      ~statusCode=200,
-      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringifyAny(result) |> Js.Option.getExn,
-      ()
-    )
+  |> Js.Promise.then_(_ => {
+    "OK"
+    |> Js.Json.string
     |> Js.Promise.resolve;
   });
-};
+});

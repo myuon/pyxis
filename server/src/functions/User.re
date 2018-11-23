@@ -19,24 +19,18 @@ let convert : DB.User.t => t = json => [%bs.obj {
   },
 }];
 
-let getMe = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-  open AwsLambda.APIGatewayProxy.EventRequestContext;
-  let userId = event
-    |> requestContextGet
-    |> authorizerGet |> Js.Option.getExn
-    |> Js.Dict.unsafeGet(_, "userId")
-    |> Js.Json.decodeString |> Js.Option.getExn;
+let getMe = Controller.wrapper((event) => {
+  let userId = event##requestContext
+    |> Js.Dict.unsafeGet(_, "authorizer")
+    |> Js.Json.parseExn
+    |> RawJson.decode
+    |> x => x##userId;
 
   DB.User.get(userId)
   |> Js.Promise.then_((result : DB.QueryResult.one(DB.User.t)) => {
-    Result.make(
-      ~statusCode=200,
-      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringify(result.item |> convert |> encode),
-      ()
-    )
+    result.item
+    |> convert
+    |> encode
     |> Js.Promise.resolve;
   });
-};
+});

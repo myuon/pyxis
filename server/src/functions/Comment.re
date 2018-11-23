@@ -1,8 +1,6 @@
 external decode : Js.Json.t => 'a = "%identity";
 
-let create = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-
+let create = Controller.wrapper((event) => {
   let input : {
     .
     "content": string,
@@ -12,9 +10,7 @@ let create = (event, _context, _cb) => {
       "ticket": string,
     },
     "owned_by": string,
-  } = event
-    |> Event.bodyGet
-    |> Js.Option.getExn
+  } = event##body
     |> Js.Json.parseExn
     |> decode;
   
@@ -38,17 +34,12 @@ let create = (event, _context, _cb) => {
       )
     )
     |> Js.Promise.then_(result => {
-      Result.make(
-        ~statusCode=200,
-        ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-        ~body=Js.Json.stringifyAny(result) |> Js.Option.getExn,
-        (),
-      )
+      result
+      |> RawJson.encode
       |> Js.Promise.resolve;
-    })
-    |> Js.Promise.resolve;
-  })
-};
+    });
+  });
+});
 
 type t = Js.t({
   .
@@ -75,35 +66,16 @@ let parse : DB.Comment.t => t = json => {
 };
 external encode : t => Js.Json.t = "%identity";
 
-let list = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-
-  let ticketId = event
-    |> Event.pathParametersGet
-    |> Js.Option.getExn
+let list = Controller.wrapper((event) => {
+  let ticketId = event##pathParameters
     |> Js.Dict.get(_, "ticketId")
     |> Js.Option.getExn;
   
   DB.Comment.list(ticketId)
   |> Js.Promise.then_((result : DB.QueryResult.many(DB.Comment.t)) => {
-    Result.make(
-      ~statusCode=200,
-      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringify(result.items
-        |> Js.Array.map(item => item |> parse |> encode)
-        |> Js.Json.array
-      ),
-      ()
-    )
-    |> Js.Promise.resolve;
-  })
-  |> Js.Promise.catch(err => {
-    Result.make(
-      ~statusCode=500,
-      ~headers=Js.Dict.fromArray([| ("Access-Control-Allow-Origin", Js.Json.string("*")) |]),
-      ~body=Js.Json.stringifyAny(err) |> Js.Option.getExn,
-      ()
-    )
+    result.items
+    |> Js.Array.map(item => item |> parse |> encode)
+    |> Js.Json.array
     |> Js.Promise.resolve;
   });
-};
+});

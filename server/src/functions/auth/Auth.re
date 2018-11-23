@@ -113,13 +113,8 @@ let idpVerify : (string) => Js.Promise.t(string) = token => {
   });
 };
 
-let userNameAvailable = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
-  let userName : string = event
-    |> pathParametersGet
-    |> Js.Option.getExn
+let userNameAvailable = Controller.wrapper((event) => {
+  let userName : string = event##pathParameters
     |> Js.Dict.unsafeGet(_, "user_name");
 
   DB.User.getByName(userName)
@@ -127,33 +122,22 @@ let userNameAvailable = (event, _context, _cb) => {
     Js.log(result);
     Js.log(result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item"));
 
-    Result.make(
-      ~statusCode=200,
-      ~headers=Js.Dict.fromArray([|
-        ("Access-Control-Allow-Origin", Js.Json.string("*")),
-      |]),
-      ~body=if (result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isNone) {
-        "true"
-      } else {
-        "false"
-      },
-      ()
-    )
+    (if (result |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isNone) {
+      "true"
+    } else {
+      "false"
+    })
+    |> Js.Json.string
     |> Js.Promise.resolve;
   });
-};
+});
 
-let signUp = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
+let signUp = Controller.wrapper((event) => {
   let body : Js.t({
     .
     token: string,
     user_name: string,
-  }) = event
-    |> bodyGet
-    |> Js.Option.getExn
+  }) = event##body
     |> Js.Json.parseExn
     |> decode;
 
@@ -167,15 +151,8 @@ let signUp = (event, _context, _cb) => {
     ))
     |> Js.Promise.then_(((result_name, result_idp)) => {
       if (result_name |> Js.Json.decodeObject |> Js.Option.getExn |> Js.Dict.get(_, "Item") |> Js.Option.isSome || result_idp) {
-        Result.make(
-          ~statusCode=400,
-          ~headers=Js.Dict.fromArray([|
-            ("Access-Control-Allow-Origin", Js.Json.string("*")),
-            ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
-          |]),
-          ~body="Validation Error",
-          ()
-        )
+        "Validation Error"
+        |> Js.Json.string
         |> Js.Promise.resolve;
       } else {
         DB.User.create(
@@ -190,33 +167,21 @@ let signUp = (event, _context, _cb) => {
             DB.User.createNameAlias(body##user_name, userId),
           |])
           |> Js.Promise.then_(_ => {
-            Result.make(
-              ~statusCode=200,
-              ~headers=Js.Dict.fromArray([|
-                ("Access-Control-Allow-Origin", Js.Json.string("*")),
-                ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
-              |]),
-              ~body="{\"result\": true}",
-              ()
-            )
+            { "result": true }
+            |> RawJson.encode
             |> Js.Promise.resolve;
           });
         });
       }
     });
   });
-};
+});
 
-let signIn = (event, _context, _cb) => {
-  open AwsLambda.APIGatewayProxy;
-  open AwsLambda.APIGatewayProxy.Event;
-
+let signIn = Controller.wrapper((event) => {
   let body : Js.t({
     .
     token: string,
-  }) = event
-    |> bodyGet
-    |> Js.Option.getExn
+  }) = event##body
     |> Js.Json.parseExn
     |> decode;
 
@@ -240,25 +205,10 @@ let signIn = (event, _context, _cb) => {
           }] |> encode
         );
 
-        Result.make(
-          ~statusCode=200,
-          ~headers=Js.Dict.fromArray([|
-            ("Access-Control-Allow-Origin", Js.Json.string("*")),
-            ("Access-Control-Allow-Credentials", Js.Json.boolean(true)),
-            /*
-            Currently we do not use Set-Cookie header since it does not work in offline http environment
-            ("Set-Cookie", Js.Json.string({j|token=$token; Max-Age=7200;|j}))
-            */
-          |]),
-          ~body={
-            "token": token
-          } |> encode |> Js.Json.stringify,
-          ()
-        )
+        { "token": token }
+        |> RawJson.encode
         |> Js.Promise.resolve;
-      })
-      |> Js.Promise.resolve;
-    })
-    |> Js.Promise.resolve;
+      });
+    });
   });
-};
+});

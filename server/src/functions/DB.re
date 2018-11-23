@@ -38,7 +38,7 @@ module Project = {
     let t = parse_(json);
 
     [%bs.obj {
-      id: t##id |> Js.String.split("project-") |> x => x[1],
+      id: t##id |> Js.String.split("project##") |> x => x[1],
       title: t##title,
       tickets: t##tickets,
       owned_by: t##owned_by,
@@ -131,7 +131,7 @@ module Ticket = {
     let t = parse_(json);
 
     [%bs.obj {
-      id: t##id |> Js.String.split("ticket-") |> x => x[1],
+      id: t##id |> Js.String.split("ticket##") |> x => x[1],
       title: t##title,
       comment: t##comment,
       assigned_to: t##assigned_to,
@@ -157,7 +157,7 @@ module Ticket = {
     let id = UUID.uuid();
 
     DAO.create({
-      "id": {j|ticket-$id|j},
+      "id": {j|ticket##$id|j},
       "sort": "detail",
       "title": json##title,
       "comment": 0,
@@ -189,7 +189,7 @@ module Ticket = {
 
   let get = (ticketId) => {
     DAO.get(
-      ~id={j|ticket-$ticketId|j},
+      ~id={j|ticket##$ticketId|j},
       ~sort="detail",
     )
     |> Js.Promise.then_(result => {
@@ -201,7 +201,7 @@ module Ticket = {
 
   let update = (ticketId, label, value) => {
     DAO.update(
-      ~id={j|ticket-$ticketId|j},
+      ~id={j|ticket##$ticketId|j},
       ~sort="detail",
       ~label=label,
       ~value=value
@@ -210,7 +210,7 @@ module Ticket = {
 
   let delete = (ticketId) => {
     DAO.list(
-      ~id={j|ticket-$ticketId|j},
+      ~id={j|ticket##$ticketId|j},
       ()
     )
     |> Js.Promise.then_(result => {
@@ -247,7 +247,7 @@ module Page = {
     let t = parse_(json);
 
     [%bs.obj {
-      id: t##id |> Js.String.split("ticket-") |> x => x[1],
+      id: t##id |> Js.String.split("ticket##") |> x => x[1],
       title: t##title,
       content: t##content,
       belongs_to: {
@@ -262,7 +262,7 @@ module Page = {
 
   let list = (ticketId) => {
     DAO.list(
-      ~id={j|ticket-$ticketId|j},
+      ~id={j|ticket##$ticketId|j},
       ~sortPrefix="page",
       ()
     )
@@ -289,8 +289,8 @@ module Page = {
     let pageId = json##id;
 
     DAO.create({
-      "id": {j|ticket-$ticketId|j},
-      "sort": {j|page-$pageId|j},
+      "id": {j|ticket##$ticketId|j},
+      "sort": {j|page##$pageId|j},
       "title": json##title,
       "content": if (json##content != "") { json##content } else { [%raw {| null |}] },
       "belongs_to": {
@@ -321,7 +321,7 @@ module Comment = {
     let t = parse_(json);
 
     [%bs.obj {
-      id: t##sort |> Js.String.split("comment-", _) |> x => x[1],
+      id: t##sort |> Js.String.split("comment##", _) |> x => x[1],
       sort: t##sort,
       content: t##content,
       created_at: t##created_at,
@@ -337,7 +337,7 @@ module Comment = {
 
   let list = (ticketId) => {
     DAO.list(
-      ~id={j|ticket-$ticketId|j},
+      ~id={j|ticket##$ticketId|j},
       ~sortPrefix="comment",
       ()
     )
@@ -361,8 +361,8 @@ module Comment = {
     let ticketId = item##belongs_to##ticket;
 
     DAO.create({
-      "id": {j|ticket-$ticketId|j},
-      "sort": {j|comment-$commentId|j},
+      "id": {j|ticket##$ticketId|j},
+      "sort": {j|comment##$commentId|j},
       "content": item##content,
       "belongs_to": item##belongs_to,
       "created_at": Js.Date.make() |> Js.Date.toISOString,
@@ -384,7 +384,7 @@ module Idp = {
     let t = parse_(json);
 
     /* Assume that idpId does not include hyphens: this is unsafe a bit */
-    let [| _, idp, idpId |] = t##id |> Js.String.split("-");
+    let [| _, idp, idpId |] = t##id |> Js.String.split("##");
 
     [%bs.obj {
       id: idpId,
@@ -413,7 +413,7 @@ module User = {
     let t = parse_(json);
 
     [%bs.obj {
-      id: t##id |> Js.String.split("user-", _) |> x => x[1],
+      id: t##id |> Js.String.split("user##", _) |> x => x[1],
       sort: t##sort,
       idp: {
         google: t##idp##google,
@@ -425,7 +425,7 @@ module User = {
 
   let findById = userId => {
     DAO.get(
-      ~id={j|user-$userId|j},
+      ~id={j|user##$userId|j},
       ~sort="detail",
     )
     |> Js.Promise.then_(result => {
@@ -437,7 +437,7 @@ module User = {
 
   let findViaIdp = (idp, idp_id) => {
     DAO.get(
-      ~id={j|idp-$idp-$idp_id|j},
+      ~id={j|idp##$idp##$idp_id|j},
       ~sort="detail",
     )
     |> Js.Promise.then_(result => {
@@ -449,7 +449,7 @@ module User = {
 
   let createIdp = (idp, idpId, userId) => {
     DAO.create({
-      "id": {j|idp-$idp-$idpId|j},
+      "id": {j|idp##$idp##$idpId|j},
       "sort": "detail",
       "owned_by": userId
     });
@@ -459,7 +459,7 @@ module User = {
     let userId = UUID.uuid();
     
     DAO.create({
-      "id": {j|user-$userId|j},
+      "id": {j|user##$userId|j},
       "sort": "detail",
       "idp": idp,
       "created_at": Js.Date.make() |> Js.Date.toISOString,
@@ -473,7 +473,7 @@ module User = {
 
   let get = (userId) => {
     DAO.get(
-      ~id={j|user-$userId|j},
+      ~id={j|user##$userId|j},
       ~sort="detail",
     )
     |> Js.Promise.then_(result => {

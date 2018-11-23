@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "watch": "bsb -make-world -w",
-    "deploy": "yarn build && aws s3 sync . s3://pyxis-web/ --include '*' --acl public-read"
+    "deploy": "bsb -make-world && yarn build && aws s3 sync dist s3://pyxis-web/ --include '*' --acl public-read"
   },
   "dependencies": {
     "@justgage/reason-cookie": "^0.1.2",

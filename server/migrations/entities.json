@@ -1,6 +1,6 @@
 [
   {
-    "id": "user-1",
+    "id": "user##1",
     "sort": "detail",
     "idp": {
       "google": "114109636747250816920"
@@ -9,33 +9,33 @@
     "user_name": "myuon"
   },
   {
-    "id": "idp-google-114109636747250816920",
+    "id": "idp##google##114109636747250816920",
     "sort": "detail",
     "owned_by": "1"
   },
   {
-    "id": "project-abcd",
+    "id": "project##abcd",
     "sort": "detail",
     "title": "project AAA",
     "tickets": [ "ABCD", "EFGH" ],
     "owned_by": "1"
   },
   {
-    "id": "project-efgh",
+    "id": "project##efgh",
     "sort": "detail",
     "title": "project QQQ",
     "tickets": [ "IJKL" ],
     "owned_by": "1"
   },
   {
-    "id": "project-klmn",
+    "id": "project##klmn",
     "sort": "detail",
     "title": "project BBB",
     "tickets": [],
     "owned_by": "1"
   },
   {
-    "id": "ticket-ABCD",
+    "id": "ticket##ABCD",
     "sort": "detail",
     "title": "some bug reported!",
     "assigned_to": [ "1", "2" ],
@@ -46,8 +46,8 @@
     "owned_by": "1"
   },
   {
-    "id": "ticket-ABCD",
-    "sort": "page-1",
+    "id": "ticket##ABCD",
+    "sort": "page##1",
     "title": "default",
     "content": "# test\n\n### subtitle\n\nhoge\n\nThis is a paragraph.\nNewline.\n\n- a\n- b",
     "belongs_to": {
@@ -56,8 +56,8 @@
     "owned_by": "1"
   },
   {
-    "id": "ticket-ABCD",
-    "sort": "comment-1",
+    "id": "ticket##ABCD",
+    "sort": "comment##1",
     "content": "This is a sample comment.",
     "owned_by": "1",
     "created_at": "2018-10-18 08:22:53",
@@ -66,8 +66,8 @@
     }
   },
   {
-    "id": "ticket-ABCD",
-    "sort": "comment-2",
+    "id": "ticket##ABCD",
+    "sort": "comment##2",
     "content": "- piyo\n- nyan\n- hoge",
     "owned_by": "1",
     "created_at": "2018-10-19 23:11:20",
@@ -76,7 +76,7 @@
     }
   },
   {
-    "id": "ticket-EFGH",
+    "id": "ticket##EFGH",
     "sort": "detail",
     "title": "feature request: piyo",
     "assigned_to": [ "2", "3" ],
@@ -87,8 +87,8 @@
     "owned_by": "1"
   },
   {
-    "id": "ticket-EFGH",
-    "sort": "page-1",
+    "id": "ticket##EFGH",
+    "sort": "page##1",
     "title": "default",
     "content": "# First Page",
     "belongs_to": {
@@ -97,8 +97,8 @@
     "owned_by": "1"
   },
   {
-    "id": "ticket-EFGH",
-    "sort": "page-2",
+    "id": "ticket##EFGH",
+    "sort": "page##2",
     "title": "default",
     "content": "# Second Page",
     "belongs_to": {
@@ -107,7 +107,7 @@
     "owned_by": "1"
   },
   {
-    "id": "ticket-IJKL",
+    "id": "ticket##IJKL",
     "sort": "detail",
     "title": "start a new project",
     "assigned_to": [ "1" ],

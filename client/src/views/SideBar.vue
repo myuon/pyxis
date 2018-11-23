@@ -62,6 +62,7 @@ export default {
   },
   mounted: async function () {
     this.user = await client.user.me();
+    console.log(this.uesr);
 
     if (this.user.message === 'Unauthorized') {
       this.$router.push('/signIn');

@@ -20,7 +20,7 @@ let get = Controller.wrapper((event) => {
 
   DB.Ticket.get(ticketId)
   |> Js.Promise.then_((result : DB.QueryResult.one(DB.Ticket.t)) => {
-    result
+    result.item
     |> RawJson.encode
     |> Js.Promise.resolve;
   });
